@@ -11,7 +11,7 @@ DROP TABLE IF EXISTS ProgressTracker;
 
 -- Create table Portfolio
 CREATE TABLE IF NOT EXISTS Portfolio (
-    Portfolio_ID INT(5) PRIMARY KEY NOT NULL,
+    Portfolio_ID INT PRIMARY KEY NOT NULL,
     Company_Name VARCHAR(30),
     Industry VARCHAR(20)
 );
@@ -19,13 +19,13 @@ CREATE TABLE IF NOT EXISTS Portfolio (
 -- Create table Users
 CREATE TABLE IF NOT EXISTS Users (
     User_ID VARCHAR(10) PRIMARY KEY NOT NULL,
-    Portfolio_ID INT(10),
+    Portfolio_ID INT,
     CONSTRAINT fk_Portfolio FOREIGN KEY (Portfolio_ID) REFERENCES Portfolio(Portfolio_ID),
     First_Name VARCHAR(15),
     Last_Name VARCHAR(15),
     Email VARCHAR(50),
     Phone_Number VARCHAR(15),
-    User_Role VARCHAR(20)
+    User_Role VARCHAR(100)
 );
 
 -- Create table Provider
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS Vulnerability (
     Vulnerability_ID VARCHAR(15) PRIMARY KEY NOT NULL,
     Provider_ID VARCHAR(10),
     CONSTRAINT fk_Provider FOREIGN KEY (Provider_ID) REFERENCES Provider(Provider_ID),
-    Vulnerability_Type VARCHAR(15),
+    Vulnerability_Type VARCHAR(200),
     Vulnerability_Details VARCHAR(100),
     Severity_Level VARCHAR(10),
     Last_Updated DATE
