@@ -210,3 +210,26 @@ VALUES
 ('PLN-00018', 'RPT-00016', 'Dash Audit', '2025-09-12', 'Completed'),
 ('PLN-00019', 'RPT-00018', 'CRM Filter', '2025-07-03', 'Completed'),
 ('PLN-00020', 'RPT-00021', 'Report Audit', '2025-09-15', 'Completed');
+
+INSERT INTO ProgressTracker (Progress_ID, Plan_ID, Solution_Detail, Tracker_Status, Last_Updated)
+VALUES
+('PRG-00001', 'PLN-00001', 'Reviewed S3 bucket policies and removed public access.', 'Active', '2025-11-15'),
+('PRG-00002', 'PLN-00001', 'Enabled bucket encryption and logging.', 'Active', '2025-11-18'),
+('PRG-00003', 'PLN-00002', 'Rotated exposed Azure credentials.', 'Active', '2025-12-05'),
+('PRG-00004', 'PLN-00002', 'Conducted repository audit for leaked secrets.', 'Active', '2025-12-06'),
+('PRG-00005', 'PLN-00003', 'Updated IAM roles with least privilege access.', 'Active', '2025-10-12'),
+('PRG-00006', 'PLN-00005', 'Applied database security patches.', 'Active', '2025-11-16'),
+('PRG-00007', 'PLN-00005', 'Performed vulnerability retesting.', 'Completed', '2025-11-20'),
+('PRG-00008', 'PLN-00006', 'Reviewed IAM permissions across production systems.', 'Active', '2025-10-13'),
+('PRG-00009', 'PLN-00007', 'Restricted contact data access to authorized users.', 'Completed', '2025-11-30'),
+('PRG-00010', 'PLN-00008', 'Generated new API tokens and revoked old tokens.', 'Active', '2025-11-03'),
+('PRG-00011', 'PLN-00010', 'Completed phishing awareness training.', 'Completed', '2025-07-08'),
+('PRG-00012', 'PLN-00011', 'Enabled advanced email filtering and monitoring.', 'Active', '2025-07-09'),
+('PRG-00013', 'PLN-00013', 'Validated corrected S3 access control lists.', 'Completed', '2025-11-14'),
+('PRG-00014', 'PLN-00014', 'Updated Azure directory security policies.', 'Completed', '2025-08-22'),
+('PRG-00015', 'PLN-00015', 'Verified DDoS protection effectiveness.', 'Completed', '2025-02-18'),
+('PRG-00016', 'PLN-00016', 'Implemented AWS Shield protection rules.', 'Completed', '2025-09-27'),
+('PRG-00017', 'PLN-00017', 'Reviewed and corrected access control settings.', 'Completed', '2025-11-30'),
+('PRG-00018', 'PLN-00018', 'Audited dashboard permissions and sharing rules.', 'Completed', '2025-09-14'),
+('PRG-00019', 'PLN-00019', 'Enabled anti-phishing controls in CRM platform.', 'Completed', '2025-07-04'),
+('PRG-00020', 'PLN-00020', 'Validated report security and access restrictions.', 'Completed', '2025-09-16');
