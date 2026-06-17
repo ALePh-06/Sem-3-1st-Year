@@ -27,8 +27,8 @@ VALUES
 ('SAL6000001', 10001, 'Brian', 'Teo', 'brian.teo@alephtech.com', '0123456797', 'Sales Manager'),
 ('SAL6000002', 10001, 'Benjamin', 'Ho', 'benjamin.ho@alephtech.com', '0123456811', 'Sales Executive'),
 ('SAL6000003', 10001, 'Natalie', 'Pang', 'natalie.pang@alephtech.com', '0123456812', 'Business Development Executive'),
-('OPS7000001', 10001, 'Amanda', 'Khoo', 'amanda.khoo@alephtech.com', '0123456798', 'Operations Manager')
-('OPS7000002', 10001, 'Marcus', 'Yong', 'marcus.yong@alephtech.com', '0123456813', 'Operations Executive');;
+('OPS7000001', 10001, 'Amanda', 'Khoo', 'amanda.khoo@alephtech.com', '0123456798', 'Operations Manager'),
+('OPS7000002', 10001, 'Marcus', 'Yong', 'marcus.yong@alephtech.com', '0123456813', 'Operations Executive');
 
 INSERT INTO Provider (Provider_ID, Provider_Name, Provider_Type, Contact_Email, Website)
 VALUES
