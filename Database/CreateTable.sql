@@ -11,7 +11,7 @@ DROP TABLE IF EXISTS ProgressTracker;
 
 -- Create table Portfolio
 CREATE TABLE IF NOT EXISTS Portfolio (
-    Portfolio_ID INT PRIMARY KEY NOT NULL,
+    Portfolio_ID INT(5) PRIMARY KEY NOT NULL,
     Company_Name VARCHAR(30),
     Industry VARCHAR(20)
 );
@@ -31,10 +31,10 @@ CREATE TABLE IF NOT EXISTS Users (
 -- Create table Provider
 CREATE TABLE IF NOT EXISTS Provider (
     Provider_ID VARCHAR(10) PRIMARY KEY NOT NULL,
-    Provider_Name VARCHAR(15),
-    Provider_Type VARCHAR(15),
+    Provider_Name VARCHAR(50),
+    Provider_Type VARCHAR(20),
     Contact_Email VARCHAR(50),
-    Website VARCHAR(30)
+    Website VARCHAR(100)
 );
 
 -- Create table Cloud Account
