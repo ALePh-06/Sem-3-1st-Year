@@ -124,3 +124,4 @@ CREATE TABLE AuditLog (
     Change_Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     Change_Detail VARCHAR(200)
 );
+
