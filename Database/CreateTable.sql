@@ -114,14 +114,3 @@ CREATE TABLE IF NOT EXISTS ProgressTracker (
 );
 
 
---(YEAP) Create audit table for trigger
-CREATE TABLE AuditLog (
-    Audit_ID INT AUTO_INCREMENT PRIMARY KEY,
-    Table_Name VARCHAR(30),
-    Action_Type VARCHAR(10),   -- INSERT, UPDATE, DELETE
-    Record_ID VARCHAR(20),
-    Changed_By VARCHAR(50),
-    Change_Date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    Change_Detail VARCHAR(200)
-);
-
