@@ -35,5 +35,5 @@ function PatientSim(show, improve, patients, patientsPH, patientsNH)
 
   % --- Print results ---
   splitResultsByGroup(arrivalTimes, startTime, finishTime, waitTime, priority, ...
-                      startHour, doctorAssigned, totalPatients, overflow, show, improve);
+                      startHour, doctorAssigned, totalPatients, overflow, show, improve, patientsPH, patientsNH);
 endfunction

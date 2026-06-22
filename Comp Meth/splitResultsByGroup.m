@@ -1,4 +1,4 @@
-function splitResultsByGroup(arrivalTimes, startTime, finishTime, waitTime, priority, startHour, doctorAssigned, totalPatients, overflow, show, improve)
+function splitResultsByGroup(arrivalTimes, startTime, finishTime, waitTime, priority, startHour, doctorAssigned, totalPatients, overflow, show, improve, patientsPH, patientsNH)
   % Filter displayed table by peak/non-peak based on 'show'
   if show == 1
     showMask = (startTime >= 0 & startTime < 480);      % Peak Hours (9am-5pm)
@@ -33,7 +33,7 @@ function splitResultsByGroup(arrivalTimes, startTime, finishTime, waitTime, prio
   else
     printf("No patients were served.\n");
   endif
-  reportShiftBreakdown(startTime, overflow);
+  reportShiftBreakdown(startTime, overflow, patientsPH, patientsNH);
   % --- Per-doctor utilization ---
   printf("Doctor Utilization\n");
   if improve == 1
