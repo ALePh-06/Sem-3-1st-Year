@@ -1,9 +1,26 @@
+#include <iostream>
+using namespace std;
+
 class CPU;
 
 class Instruction {
 public:
     virtual void execute(CPU& cpu) = 0;   // pure virtual
     virtual ~Instruction() {}             // always virtual destructor
+};
+
+class IOIns : public Instruction {
+protected:
+    int dest;
+public:
+    IOIns(int d) : dest(d) {}
+};
+
+class OneAddIns : public Instruction {
+protected:
+    int dest;
+public:
+    OneAddIns(int d) : dest(d) {}
 };
 
 class ArithmeticIns : public Instruction {
@@ -15,34 +32,92 @@ public:
     // still abstract
 };
 
-class AddIns : public ArithmeticIns {
+class Input : public IOIns {
 public:
-    AddIns(int d, int s) : ArithmeticIns(d, s) {}
+    Input(int d) : IOIns(d) {}
     void execute(CPU& cpu) override {
-        cpu.GetRegister(dest) += cpu.GetRegister(src)
-    };
-};
-
-class SubIns : public ArithmeticIns {
-public:
-    SubIns(int d, int s) : ArithmeticIns(d, s) {}
-    void execute(CPU& cpu) override {
-        cpu.GetRegister(dest) -= cpu.GetRegister(src)
-    };
-};
-
-class MulIns : public ArithmeticIns {
-public:
-    MulIns(int d, int s) : ArithmeticIns(d, s) {}
-    void execute(CPU& cpu) override {
-        cpu.GetRegister(dest) *= cpu.GetRegister(src)
+        int num;
+        do {
+            cout << "? ";
+            cin >> num;
+        } while (num < -128 || num > 127)
+        
+        cpu.InsertRegister(dest, num);
     }
 };
 
-class DivIns : public ArithmeticIns {
+class Output : public IOIns {
 public:
-    DivIns(int d, int s) : ArithmeticIns(d, s) {}
+    Output(int d) : IOIns(d) {}
     void execute(CPU& cpu) override {
-        cpu.GetRegister(dest) /= cpu.GetRegister(src)
+        int num;
+        num = cpu.GetRegister(dest);
+        cout << "R" << dest << endl;
+        cout << num << endl;
+    }
+};
+
+class Inc : public OneAddIns {
+public:
+    Inc(int d) : OneAddIns(d) {}
+    void execute(CPU& cpu) override {
+        cpu.GetRegister(dest) += 1;
+    }
+};
+
+class Inc : public OneAddIns {
+public:
+    Inc(int d) : OneAddIns(d) {}
+    void execute(CPU& cpu) override {
+        cpu.GetRegister(dest) -= 1;
+    }
+};
+
+class Add : public ArithmeticIns {
+public:
+    Add(int d, int s) : ArithmeticIns(d, s) {}
+    void execute(CPU& cpu) override {
+        cpu.GetRegister(dest) += cpu.GetRegister(src);
+    }
+};
+
+class Sub : public ArithmeticIns {
+public:
+    Sub(int d, int s) : ArithmeticIns(d, s) {}
+    void execute(CPU& cpu) override {
+        cpu.GetRegister(dest) -= cpu.GetRegister(src);
+    }
+};
+
+class Mul : public ArithmeticIns {
+public:
+    Mul(int d, int s) : ArithmeticIns(d, s) {}
+    void execute(CPU& cpu) override {
+        cpu.GetRegister(dest) *= cpu.GetRegister(src);
+    }
+};
+
+class Div : public ArithmeticIns {
+public:
+    Div(int d, int s) : ArithmeticIns(d, s) {}
+    void execute(CPU& cpu) override {
+        cpu.GetRegister(dest) /= cpu.GetRegister(src);
+    }
+};
+
+
+class ShiftR : public ArithmeticIns {
+    public:
+    ShiftR(int d, int s) : ArithmeticIns(d, s) {}
+    void execute(CPU& cpu) override {
+        cpu.GetRegister(dest) *= 2*src;
+    }
+};
+
+class ShiftL : public ArithmeticIns {
+    public:
+    ShiftL(int d, int s) : ArithmeticIns(d, s) {}
+    void execute(CPU& cpu) override {
+        cpu.GetRegister(dest) /= 2*src;
     }
 };
