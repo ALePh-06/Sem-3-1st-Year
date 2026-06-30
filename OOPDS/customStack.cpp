@@ -34,7 +34,8 @@ class customVector {
     //allows usage similar to an array
     T& operator[](int index){return data[index];}
 
-    int getSize(){
+    int getSize()
+    {
         return size;
     }
 };
@@ -80,7 +81,7 @@ class customQueue
     private:
     struct node 
     {
-        T val; 
+        T val;
         node* next;
         Node(T v) : val(v), next(nullptr) {}
     };
@@ -100,7 +101,10 @@ class customQueue
     }
     T dequeue() 
     {
-        if (!front) { cout << "Queue empty." << endl; exit(1); }
+        if (!front) 
+        { 
+            cout << "Queue empty." << endl; exit(1);
+        }
         T val = front->val; // saving values
         Node* temp = front; //save pointer to  be deleted
         front = front->next; //move point
@@ -112,3 +116,6 @@ class customQueue
     bool isEmpty() { return size == 0; }
     int getSize() { return size; }
 };
+
+//MOV LOAD STORE PUSH POP
+//foward declare CPU so it can be referred
