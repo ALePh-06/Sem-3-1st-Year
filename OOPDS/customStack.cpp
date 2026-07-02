@@ -156,7 +156,7 @@ public:
         else 
         {
             // MOV R0, 10 — immediate value
-            cpu.getRegisters().setRegister(destIdx, (signed char)stoi(src));
+              cpu.setReg(destIdx, (signed char)stoi(src));
             // if in numbers the stoi changes to integer then cast to signed char and store in destination
         }
     }
