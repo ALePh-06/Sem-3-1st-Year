@@ -21,7 +21,208 @@ signed char fromBinary(int bits[8]) {
     return (signed char)result;
 }
 
-class CPU;
+class customStack {
+private:
+    signed char data[8]; //creats 8 slots, one per byte
+    int SI;
+    //refers to stack index register
+public:
+customStack (): SI(-1){}
+//same as stack where -1 is made empty
+int getSI () {
+        return SI;} //returns SI value for cpu to recognize stack depth
+
+void push (int8_t val) 
+{
+    if (SI >=7)// checks if the stack is full or not, if yes the increment SI and store the data
+    {
+        cout << "Stack overflow."<< endl;
+        exit(1); //just crash the thing
+    }
+    data [++SI] = val; //increment top and store
+}
+signed char pop() {
+    if (SI < 0)//checks if empty and if true then SI is decremented, value stays but unreachable 
+    {
+        cout << "Stack underflow." << endl;
+        exit(1); //also crash but on empty pop
+    }
+    return data[SI--];
+    }
+
+    bool isEmpty() { return SI == -1; }//empties the SI that was decremented
+};
+
+class Registers {
+
+    private:
+    int8_t R[8];
+
+    public:
+    Registers () 
+    {
+        for ( int i = 0; i < 8; i++ )
+            R[i] = 0;
+    }
+
+    int8_t getRegister (int pos) {
+        return R[pos];
+    }
+
+    void setRegister (int pos, int value) {
+        R[pos] = value;
+    } 
+};
+
+class Memory {
+    private:
+    int8_t M[64];
+
+    public:
+    Memory ()
+    {
+        for ( int i = 0; i < 64; i++)
+        M[i] = 0;
+    }
+
+    int8_t getMemory ( int pos ) {
+        return M[pos];
+    }
+
+    void setMemory ( int pos, int value ) {
+        M[pos] = value;
+    }
+
+};
+
+class Flags {
+    private:
+    bool UF = false, OF = false, ZF = false, CF = false;
+
+    public:
+
+    bool getUF () {
+        return UF;
+    }
+
+    bool getOF () {
+        return OF;
+    }
+
+    bool getZF () {
+        return ZF;
+    }
+
+    bool getCF () {
+        return CF;
+    }
+
+    void setUF ( bool b ) {
+        UF =  b;
+    }
+
+     void setOF ( bool b ) {
+        OF =  b;
+    }
+
+    void setZF ( bool b ) {
+        ZF =  b;
+    }
+
+    void setCF ( bool b ) {
+        CF =  b;
+    }
+
+    void updateFlags(int result) {
+    setOF(result > 127);
+    setUF(result < -128);
+    setZF(result == 0);
+    setCF(result > 127 || result < -128);
+}
+};
+
+class ProgramCounter {
+    private:
+    uint8_t PC;
+
+    public:
+
+    ProgramCounter() {
+        PC = 0;
+    }
+
+    uint8_t getPC () {
+        return PC;
+    }
+
+    void IncPC () {
+        PC++;
+    }
+};
+
+
+class StackIndex {
+    private:
+    uint8_t SI;
+
+    public:
+
+    StackIndex () {
+        SI = 0;
+    }
+
+    uint8_t getSI () {
+        return SI;
+    }
+
+    void IncSI () {
+        SI++;
+    }
+
+    void DecSI () {
+        SI--;
+    }
+};
+
+class CPU {
+    private:
+    Registers reg;
+    Memory mem;
+    Flags flags;
+    ProgramCounter PC;
+    customStack CS;
+    
+    public:
+
+    CPU () {};
+    // Registers focus
+    void setReg( int pos, int value) { reg.setRegister(pos, value); };
+    int8_t getReg(int pos) { return reg.getRegister(pos); };
+
+    // Memory focus
+    void setMem (int pos, int value) { mem.setMemory(pos, value); };
+    int8_t getMem( int pos ) { return mem.getMemory(pos); };
+
+    // PC focus
+    int8_t getPC() { return PC.getPC(); };
+    void incrementPC() { PC.IncPC(); };
+    
+    // Flags focus
+    bool getUF () { return flags.getUF(); };
+    bool getOF () { return flags.getOF(); };
+    bool getZF () { return flags.getZF(); };
+    bool getCF () { return flags.getCF(); };
+    void setUF(bool b) { flags.setUF(b); }
+    void setOF(bool b) { flags.setOF(b); }
+    void setZF(bool b) { flags.setZF(b); }
+    void setCF(bool b) { flags.setCF(b); }
+    void updateFlags(int result) { flags.updateFlags(result); }
+
+    // Stack Focus
+    void pushStack(int8_t val)   { CS.push(val); }
+    int8_t popStack()            { return CS.pop(); }
+    int getSI()                  { return CS.getSI(); }
+};
 
 //ALif
 class Instruction {
@@ -351,210 +552,7 @@ public:
     }
 };
 
-
-class customStack {
-private:
-    signed char data[8]; //creats 8 slots, one per byte
-    int SI;
-    //refers to stack index register
-public:
-customStack (): SI(-1){}
-//same as stack where -1 is made empty
-int getSI () {
-        return SI;} //returns SI value for cpu to recognize stack depth
-
-void push (int8_t val) 
-{
-    if (SI >=7)// checks if the stack is full or not, if yes the increment SI and store the data
-    {
-        cout << "Stack overflow."<< endl;
-        exit(1); //just crash the thing
-    }
-    data [++SI] = val; //increment top and store
-}
-signed char pop() {
-    if (SI < 0)//checks if empty and if true then SI is decremented, value stays but unreachable 
-    {
-        cout << "Stack underflow." << endl;
-        exit(1); //also crash but on empty pop
-    }
-    return data[SI--];
-    }
-
-    bool isEmpty() { return SI == -1; }//empties the SI that was decremented
-};
-
-class Registers {
-
-    private:
-    int8_t R[8];
-
-    public:
-    Registers () 
-    {
-        for ( int i = 0; i < 8; i++ )
-            R[i] = 0;
-    }
-
-    int8_t getRegister (int pos) {
-        return R[pos];
-    }
-
-    void setRegister (int pos, int value) {
-        R[pos] = value;
-    } 
-};
-
-class Memory {
-    private:
-    int8_t M[64];
-
-    public:
-    Memory ()
-    {
-        for ( int i = 0; i < 64; i++)
-        M[i] = 0;
-    }
-
-    int8_t getMemory ( int pos ) {
-        return M[pos];
-    }
-
-    void setMemory ( int pos, int value ) {
-        M[pos] = value;
-    }
-
-};
-
-class Flags {
-    private:
-    bool UF = false, OF = false, ZF = false, CF = false;
-
-    public:
-
-    bool getUF () {
-        return UF;
-    }
-
-    bool getOF () {
-        return OF;
-    }
-
-    bool getZF () {
-        return ZF;
-    }
-
-    bool getCF () {
-        return CF;
-    }
-
-    void setUF ( bool b ) {
-        UF =  b;
-    }
-
-     void setOF ( bool b ) {
-        OF =  b;
-    }
-
-    void setZF ( bool b ) {
-        ZF =  b;
-    }
-
-    void setCF ( bool b ) {
-        CF =  b;
-    }
-
-    void updateFlags(int result) {
-    setOF(result > 127);
-    setUF(result < -128);
-    setZF(result == 0);
-    setCF(result > 127 || result < -128);
-}
-};
-
-class ProgramCounter {
-    private:
-    uint8_t PC;
-
-    public:
-
-    ProgramCounter() {
-        PC = 0;
-    }
-
-    uint8_t getPC () {
-        return PC;
-    }
-
-    void IncPC () {
-        PC++;
-    }
-};
-
-
-class StackIndex {
-    private:
-    uint8_t SI;
-
-    public:
-
-    StackIndex () {
-        SI = 0;
-    }
-
-    uint8_t getSI () {
-        return SI;
-    }
-
-    void IncSI () {
-        SI++;
-    }
-
-    void DecSI () {
-        SI--;
-    }
-};
-
-class CPU {
-    private:
-    Registers reg;
-    Memory mem;
-    Flags flags;
-    ProgramCounter PC;
-    customStack CS;
-    
-    public:
-
-    CPU () {};
-    // Registers focus
-    void setReg( int pos, int value) { reg.setRegister(pos, value); };
-    int8_t getReg(int pos) { return reg.getRegister(pos); };
-
-    // Memory focus
-    void setMem (int pos, int value) { mem.setMemory(pos, value); };
-    int8_t getMem( int pos ) { return mem.getMemory(pos); };
-
-    // PC focus
-    int8_t getPC() { return PC.getPC(); };
-    void incrementPC() { PC.IncPC(); };
-    
-    // Flags focus
-    bool getUF () { return flags.getUF(); };
-    bool getOF () { return flags.getOF(); };
-    bool getZF () { return flags.getZF(); };
-    bool getCF () { return flags.getCF(); };
-    void setUF(bool b) { flags.setUF(b); }
-    void setOF(bool b) { flags.setOF(b); }
-    void setZF(bool b) { flags.setZF(b); }
-    void setCF(bool b) { flags.setCF(b); }
-    void updateFlags(int result) { flags.updateFlags(result); }
-
-    // Stack Focus
-    void pushStack(int8_t val)   { CS.push(val); }
-    int8_t popStack()            { return CS.pop(); }
-    int getSI()                  { return CS.getSI(); }
-};
-
-int main(){
+int main() {
+    CPU cpu;
     return 0;
 }
