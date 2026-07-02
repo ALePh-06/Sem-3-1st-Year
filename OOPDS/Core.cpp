@@ -82,8 +82,11 @@ class Flags {
         CF =  b;
     }
 
-    void resetFlags () {
-        UF = false, OF = false, ZF = false, CF = false;
+    void updateFlags(Flags& flags, int result) {
+        flags.setOF(result > 127);
+        flags.setUF(result < -128);
+        flags.setZF(result == 0);
+        flags.setCF(result > 127 || result < -128);
     }
 };
 
@@ -131,11 +134,6 @@ class StackIndex {
     }
 };
 
-<<<<<<< HEAD
-class CPU () {
-    
-}
-=======
 class CPU {
     private:
     Registers reg;
@@ -164,10 +162,18 @@ class CPU {
     bool getOF () { return flags.getOF(); };
     bool getZF () { return flags.getZF(); };
     bool getCF () { return flags.getCF(); };
-    
+    void setUF(bool b) { flags.setUF(b); }
+    void setOF(bool b) { flags.setOF(b); }
+    void setZF(bool b) { flags.setZF(b); }
+    void setCF(bool b) { flags.setCF(b); }
+    void updateFlags(int result) { flags.updateFlags(result); }
+
+    // Stack Focus
+    void pushStack(int8_t val)   { CS.push(val); }
+    int8_t popStack()            { return CS.pop(); }
+    int getSI()                  { return CS.getSI(); }
 };
 
->>>>>>> main
 int main(){
     return 0;
 }
