@@ -3,7 +3,7 @@
 #include <cstdint>
 using namespace std;
 
-// Converts a signed byte to an 8-element int array (MSB at index 0)
+// Alif - Converts a signed byte to an 8-element int array (MSB at index 0)
 void toBinary(signed char value, int bits[8]) {
     unsigned char uval = (unsigned char)value; // reinterpret bits
     for (int i = 7; i >= 0; i--) {
@@ -12,7 +12,7 @@ void toBinary(signed char value, int bits[8]) {
     }
 }
 
-// Converts an 8-element int array (MSB at index 0) back to signed byte
+// Alif - Converts an 8-element int array (MSB at index 0) back to signed byte
 signed char fromBinary(int bits[8]) {
     unsigned char result = 0;
     for (int i = 0; i < 8; i++) {
@@ -144,12 +144,14 @@ class Memory {
 };
 
 
+//ALif
 class Instruction {
 public:
     virtual void execute(CPU& cpu) = 0;   // pure virtual
     virtual ~Instruction() {}             // always virtual destructor
 };
 
+//ALif
 class IOIns : public Instruction {
 private:
     int dest;
@@ -159,6 +161,7 @@ public:
     IOIns(int d) : dest(d) {}
 };
 
+//ALif
 class DataTransIns : public Instruction {
 private:
     int dest;
@@ -170,6 +173,7 @@ public:
     DataTransIns(int d, int s) : dest(d), src(s) {}
 };
 
+//ALif
 class IncrIns : public Instruction {
 private:
     int dest;
@@ -179,6 +183,7 @@ public:
     IncrIns(int d) : dest(d) {}
 };
 
+//ALif
 class ArithmeticIns : public Instruction {
 private:
     int dest; // register index, e.g. 2 for R2
@@ -191,6 +196,7 @@ public:
     // still abstract
 };
 
+//ALif
 class ShiftIns : public Instruction {
 private:
     int dest;   // destination register index
@@ -202,6 +208,7 @@ public:
     ShiftIns(int d, int c) : dest(d), count(c) {}
 };
 
+//ALif
 class StackIns : public Instruction {
 private:
     int dest;
@@ -211,6 +218,7 @@ public:
     StackIns(int d) : dest(d) {}
 };
 
+//ALif
 class Input : public IOIns {
 public:
     Input(int d) : IOIns(d) {}
@@ -225,6 +233,7 @@ public:
     }
 };
 
+//ALif
 class Display : public IOIns {
 public:
     Display(int d) : IOIns(d) {}
@@ -236,6 +245,7 @@ public:
     }
 };
 
+//ALif
 class Move : public DataTransIns {
 public:
     Move(int d, int s) : DataTransIns(d, s) {}
@@ -244,6 +254,7 @@ public:
     }
 };
 
+//ALif
 class Load : public DataTransIns {
 public:
     Load(int d, int s) : DataTransIns(d, s) {}
@@ -252,6 +263,7 @@ public:
     }
 };
 
+//ALif
 class Store : public DataTransIns {
 public:
     Store(int d, int s) : DataTransIns(d, s) {}
@@ -262,6 +274,7 @@ public:
     }
 };
 
+//ALif
 class Inc : public IncrIns {
 public:
     Inc(int d) : IncrIns(d) {}
@@ -273,6 +286,7 @@ public:
     }
 };
 
+//ALif
 class Dsc : public IncrIns {
 public:
     Dsc(int d) : IncrIns(d) {}
@@ -284,6 +298,7 @@ public:
     }
 };
 
+//ALif
 class Add : public ArithmeticIns {
 public:
     Add(int d, int s) : ArithmeticIns(d, s) {}
@@ -295,6 +310,7 @@ public:
     }
 };
 
+//ALif
 class Sub : public ArithmeticIns {
 public:
     Sub(int d, int s) : ArithmeticIns(d, s) {}
@@ -306,6 +322,7 @@ public:
     }
 };
 
+//ALif
 class Mul : public ArithmeticIns {
 public:
     Mul(int d, int s) : ArithmeticIns(d, s) {}
@@ -317,6 +334,7 @@ public:
     }
 };
 
+//ALif
 class Div : public ArithmeticIns {
 public:
     Div(int d, int s) : ArithmeticIns(d, s) {}
@@ -328,7 +346,7 @@ public:
     }
 };
 
-
+//ALif
 class ShLIns : public ShiftIns {
 public:
     ShLIns(int d, int c) : ShiftIns(d, c) {}
@@ -349,6 +367,7 @@ public:
     }
 };
 
+//ALif
 class ShRIns : public ShiftIns {
 public:
     ShRIns(int d, int c) : ShiftIns(d, c) {}
@@ -369,6 +388,7 @@ public:
     }
 };
 
+//ALif
 class RoLIns : public ShiftIns {
 public:
     RoLIns(int d, int c) : ShiftIns(d, c) {}
@@ -389,6 +409,7 @@ public:
     }
 };
 
+//ALif
 class RoRIns : public ShiftIns {
 public:
     RoRIns(int d, int c) : ShiftIns(d, c) {}
@@ -409,6 +430,7 @@ public:
     }
 };
 
+//ALif
 class Push : public StackIns {
 public:
     Push(int d) : StackIns(d) {}
@@ -417,6 +439,7 @@ public:
     }
 };
 
+//ALif
 class Pop : public StackIns {
 public:
     Pop(int d) : StackIns(d) {}
@@ -425,6 +448,7 @@ public:
     }
 };
 
+//ALif
 class ResetFlag : public Instruction {
 private:
     string val;
