@@ -3,10 +3,11 @@
 // custom stack(vector), dynamic
 // this part is used to store instruction loaded from .asm
 template<typename T>
-class customVector {
+class customVector  // this class works with any data type
+{
 
     private:
-    T* data; // array pinter in memory
+    T* data; // array pointer in memory
     int size; 
     int capacity;
 //doubles size of an array when its full, but basically move the old array to fit the new one
@@ -23,16 +24,16 @@ class customVector {
     public:
     customVector() :size(0),capacity(4)
     {
-        data = new T[capacity];
+        data = new T[capacity]; //Constructor with size 0 and capacity 4,then allocates
     }
     ~customVector(){delete[] data; }
     
     void push_back(T val) { 
-        if (size ==capacity) resize();
+        if (size ==capacity) resize(); //checks full or not, if yes=resize then add new data
         data[size++]= val;
     }
     //allows usage similar to an array
-    T& operator[](int index){return data[index];}
+    T& operator[](int index){return data[index];} //allows command myvector[2] along with reference if added
 
     int getSize()
     {
@@ -45,15 +46,15 @@ class customVector {
 class customStack {
     //creats 8 slots, one per byte
 private:
-    signed char data[8];
-    int top;
+    signed char data[8]; //build array of 8 slots
+    int top; //top will be 0 when something is pushed up to 7
 
 public:
-customStack (): top(-1){}
+customStack (): top(-1){} //this is the top stack to make sure the stack is empty
 
 void push (signed char val) 
 {
-    if (top >=7)
+    if (top >=7) //checks for used slots, if full then crash
     {
         cout << "Stack overflow."<< endl;
         exit(1); //just crash the thing
@@ -83,7 +84,7 @@ class customQueue
     {
         T val;
         Node* next;
-        Node(T v) : val(v), next(nullptr) {}
+        Node(T v) : val(v), next(nullptr) {} //holds a value and pointer to next
     };
     Node* front; //point first item to remove
     Node* rear; //point last item to add
@@ -94,16 +95,16 @@ class customQueue
     
         ~customQueue() 
         {
-        while (!isEmpty()) dequeue();
+        while (!isEmpty()) dequeue(); //deques until empty, so memory leak didnt happen
         }
     void enqueue(T val)
     {
-       Node* n = new Node(val);
-        if (!rear) { front = rear = n; }
+       Node* n = new Node(val); //makes new node, if empty then point to first node else attach node to the back
+        if (!rear) { front = rear = n; } 
         else { rear->next = n; rear = n; }
         size++; 
     }
-    T dequeue() 
+    T dequeue() //check for empty queue
     {
         if (!front) 
         { 
@@ -135,13 +136,14 @@ public:
 
     void execute(CPU& cpu) override 
     {
-        int destIdx = dest[1] - '0';  // "R3" → 3
+        int destIdx = dest[1] - '0';  // "R3" → 3, a way to convert string from dest to integer
 
         if (src[0] == '[') {
             // MOV R3, [R1] — indirect: R1 holds memory address
-            int srcIdx = src[2] - '0';
-            int addr = cpu.getRegisters().getRegister(srcIdx);
-            cpu.getRegisters().setRegister(destIdx, cpu.getMemory().getMemory(addr));
+            int srcIdx = src[2] - '0';//just in case if someone added'[]' at front, as failsafe
+            int addr = cpu.getRegisters().getRegister(srcIdx); //reads r1 as memory address
+            cpu.getRegisters().setRegister(destIdx, cpu.getMemory().getMemory(addr)); //go to memory address, fetch value then store at the destination
+            //turns out this is wrong but need more checks
 
         } 
         else if (src[0] == 'R') 
@@ -149,12 +151,13 @@ public:
             // MOV R0, R1 — register to register
             int srcIdx = src[1] - '0';
             cpu.getRegisters().setRegister(destIdx, cpu.getRegisters().getRegister(srcIdx));
-
+                //starts with 'r' then its read from source register and written to destination
         } 
         else 
         {
             // MOV R0, 10 — immediate value
             cpu.getRegisters().setRegister(destIdx, (signed char)stoi(src));
+            // if in numbers the stoi changes to integer then cast to signed char and store in destination
         }
     }
     
@@ -173,18 +176,20 @@ public:
         int destIdx = dest[1] - '0';
         // strip the [ ] brackets
         string inner = src.substr(1, src.size() - 2);
-
+        //removes first and last characters, usually brackets
         if (inner[0] == 'R') 
         {
             // LOAD R1, [R2] — address is stored in R2
             int srcIdx = inner[1] - '0';
             int addr = cpu.getRegisters().getRegister(srcIdx);
             cpu.getRegisters().setRegister(destIdx, cpu.getMemory().getMemory(addr));
+            //when inner starts with R then address stored in register then fetch value at the address
         } 
         else 
         {
             // LOAD R1, [20] — address is the number directly
             cpu.getRegisters().setRegister(destIdx, cpu.getMemory().getMemory(stoi(inner)));
+            //if its number then convert to integer and used as memory address
         }
     }
 };
@@ -208,6 +213,7 @@ public:
             int srcIdx = src[1] - '0';
             int addr = cpu.getRegisters().getRegister(addrIdx);
             cpu.getMemory().setMemory(addr, cpu.getRegisters().getRegister(srcIdx));
+            // same thing as on load ins,but gets address in the register and then the value then write value
         } 
         else 
         {
@@ -215,6 +221,7 @@ public:
             int srcIdx = dest[1] - '0';
             int addr = stoi(src);
             cpu.getMemory().setMemory(addr, cpu.getRegisters().getRegister(srcIdx));
+            //same as above, should there isnt a bracket
         }
     }
 };
@@ -227,12 +234,13 @@ private:
 
 public:
     PushIns(string r) : reg(r) {}
-
+    
     void execute(CPU& cpu) override 
     {
-        int idx = reg[1] - '0';
+        int idx = reg[1] - '0';//basically convert r0 to 0 and so on
         cpu.getStack().push(cpu.getRegisters().getRegister(idx));
-        cpu.getSI().IncSI();   // SI tracks how many items are on stack
+        //read value from register and then push on stack
+        cpu.getSI().IncSI();   // SI tracks how many items are on stack as a way to keep updating
     }
 };
 
@@ -248,6 +256,7 @@ public:
     {
         int idx = reg[1] - '0';
         cpu.getRegisters().setRegister(idx, cpu.getStack().pop());
-        cpu.getSI().DecSI();
+        //pop the top value then store to register,if empty then crash
+        cpu.getSI().DecSI();//updates stacks that got smaller
     }
 };
