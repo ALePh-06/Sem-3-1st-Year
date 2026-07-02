@@ -134,24 +134,24 @@ private:
 public:
     MovIns(string d, string s) : dest(d), src(s) {}
 
-    void execute(CPU& cpu) override 
+    void execute(Register& reg, Memory& mem, Flags& flags) override  
     {
         int destIdx = dest[1] - '0';  // "R3" → 3, a way to convert string from dest to integer
 
         if (src[0] == '[') {
             // MOV R3, [R1] — indirect: R1 holds memory address
             int srcIdx = src[2] - '0';//just in case if someone added'[]' at front, as failsafe
-            int addr = cpu.getRegisters().getRegister(srcIdx); //reads r1 as memory address
-            cpu.getRegisters().setRegister(destIdx, cpu.getMemory().getMemory(addr)); //go to memory address, fetch value then store at the destination
-            //turns out this is wrong but need more checks
+            int addr = reg.getRegister(srcIdx);
+            reg.setRegister(destIdx, mem.getMemory(addr));
+        
 
         } 
         else if (src[0] == 'R') 
         {
             // MOV R0, R1 — register to register
             int srcIdx = src[1] - '0';
-            cpu.getRegisters().setRegister(destIdx, cpu.getRegisters().getRegister(srcIdx));
-                //starts with 'r' then its read from source register and written to destination
+            reg.setRegister(destIdx, reg.getRegister(srcIdx));
+            //starts with 'r' then its read from source register and written to destination
         } 
         else 
         {
@@ -172,7 +172,8 @@ private:
 public:
     LoadIns(string d, string s) : dest(d), src(s) {}
 
-    void execute(CPU& cpu) override {
+    void execute(Register& reg, Memory& mem, Flags& flags) override 
+    {
         int destIdx = dest[1] - '0';
         // strip the [ ] brackets
         string inner = src.substr(1, src.size() - 2);
@@ -181,14 +182,14 @@ public:
         {
             // LOAD R1, [R2] — address is stored in R2
             int srcIdx = inner[1] - '0';
-            int addr = cpu.getRegisters().getRegister(srcIdx);
-            cpu.getRegisters().setRegister(destIdx, cpu.getMemory().getMemory(addr));
-            //when inner starts with R then address stored in register then fetch value at the address
+           int addr = reg.getRegister(srcIdx);
+            reg.setRegister(destIdx, mem.getMemory(addr));
+         //when inner starts with R then address stored in register then fetch value at the address
         } 
         else 
         {
             // LOAD R1, [20] — address is the number directly
-            cpu.getRegisters().setRegister(destIdx, cpu.getMemory().getMemory(stoi(inner)));
+             reg.setRegister(destIdx, mem.getMemory(stoi(inner)));
             //if its number then convert to integer and used as memory address
         }
     }
@@ -204,15 +205,15 @@ private:
 public:
     StoreIns(string d, string s) : dest(d), src(s) {}
 
-   void execute(CPU& cpu) override 
+   void execute(Register& reg, Memory& mem, Flags& flags) override 
    {
         if (dest[0] == '[') 
         {
             // STORE [R2], R1 — address is in R2, value is in R1
             int addrIdx = dest[2] - '0';
             int srcIdx = src[1] - '0';
-            int addr = cpu.getRegisters().getRegister(addrIdx);
-            cpu.getMemory().setMemory(addr, cpu.getRegisters().getRegister(srcIdx));
+            int addr = reg.getRegister(addrIdx);
+            mem.setMemory(addr, reg.getRegister(srcIdx));
             // same thing as on load ins,but gets address in the register and then the value then write value
         } 
         else 
@@ -220,7 +221,7 @@ public:
             // STORE R1, 43 — value is in R1, address is 43
             int srcIdx = dest[1] - '0';
             int addr = stoi(src);
-            cpu.getMemory().setMemory(addr, cpu.getRegisters().getRegister(srcIdx));
+            mem.setMemory(addr, reg.getRegister(srcIdx));
             //same as above, should there isnt a bracket
         }
     }
@@ -231,16 +232,19 @@ class PushIns : public Instruction
 {
 private:
     string reg;  // e.g. "R0"
+    customStack& stack;  // reference to stack
+    StackIndex& si;      // reference to SI
 
 public:
-    PushIns(string r) : reg(r) {}
+   PushIns(string r, customStack& s, StackIndex& si_ref) 
+        : reg(r), stack(s), si(si_ref) {}
     
-    void execute(CPU& cpu) override 
+    void execute(Register& reg2, Memory& mem, Flags& flags) override  
     {
         int idx = reg[1] - '0';//basically convert r0 to 0 and so on
-        cpu.getStack().push(cpu.getRegisters().getRegister(idx));
+        stack.push(reg2.getRegister(idx));
         //read value from register and then push on stack
-        cpu.getSI().IncSI();   // SI tracks how many items are on stack as a way to keep updating
+         si.IncSI();    // SI tracks how many items are on stack as a way to keep updating
     }
 };
 
@@ -248,15 +252,17 @@ public:
 class PopIns : public Instruction {
 private:
     string reg;  // e.g. "R0"
-
+    customStack& stack;  // reference to stack
+    StackIndex& si;      // reference to SI
 public:
-    PopIns(string r) : reg(r) {}
+ PopIns(string r, customStack& s, StackIndex& si_ref) 
+        : reg(r), stack(s), si(si_ref) {}
 
-    void execute(CPU& cpu) override 
+    void execute(Register& reg2, Memory& mem, Flags& flags) override
     {
         int idx = reg[1] - '0';
-        cpu.getRegisters().setRegister(idx, cpu.getStack().pop());
+        reg2.setRegister(idx, stack.pop());
         //pop the top value then store to register,if empty then crash
-        cpu.getSI().DecSI();//updates stacks that got smaller
+        si.DecSI();  //updates stacks that got smaller
     }
 };
