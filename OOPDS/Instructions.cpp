@@ -25,16 +25,16 @@ class customStack {
 private:
     signed char data[8]; //creats 8 slots, one per byte
     int SI;
-
+    //refers to stack index register
 public:
 customStack (): SI(-1){}
-
+//same as stack where -1 is made empty
 int getSI () {
-        return SI;}
+        return SI;} //returns SI value for cpu to recognize stack depth
 
 void push (int8_t val) 
 {
-    if (SI >=7)
+    if (SI >=7)// checks if the stack is full or not, if yes the increment SI and store the data
     {
         cout << "Stack overflow."<< endl;
         exit(1); //just crash the thing
@@ -42,14 +42,15 @@ void push (int8_t val)
     data [++SI] = val; //increment top and store
 }
 signed char pop() {
-    if (SI < 0) {
+    if (SI < 0)//checks if empty and if true then SI is decremented, value stays but unreachable 
+    {
         cout << "Stack underflow." << endl;
         exit(1); //also crash but on empty pop
     }
     return data[SI--];
     }
 
-    bool isEmpty() { return SI == -1; }
+    bool isEmpty() { return SI == -1; }//empties the SI that was decremented
 };
 
 
