@@ -92,11 +92,11 @@ class Flags {
         CF =  b;
     }
 
-    void updateFlags(Flags& flags, int result) {
-    flags.setOF(result > 127);
-    flags.setUF(result < -128);
-    flags.setZF(result == 0);
-    flags.setCF(result > 127 || result < -128);
+    void updateFlags(int result) {
+    setOF(result > 127);
+    setUF(result < -128);
+    setZF(result == 0);
+    setCF(result > 127 || result < -128);
 }
 };
 
@@ -203,6 +203,15 @@ public:
     ShiftIns(int d, int c) : dest(d), count(c) {}
 };
 
+class StackIns : public Instruction {
+private:
+    int dest;
+protected:
+    int getDest() { return dest; }
+public:
+    StackIns(int d) : dest(d) {}
+};
+
 class Input : public IOIns {
 public:
     Input(int d) : IOIns(d) {}
@@ -261,7 +270,7 @@ public:
         int val;
         val = cpu.getReg(getDest()) + 1;
         cpu.setReg(getDest(), val);
-        flags.updateFlags(flags, val);
+        cpu.updateFlags(val);
     }
 };
 
@@ -272,7 +281,7 @@ public:
         int val;
         val = cpu.getReg(getDest()) - 1;
         cpu.setReg(getDest(), val);
-        flags.updateFlags(flags, val);
+        cpu.updateFlags(val);
     }
 };
 
@@ -283,7 +292,7 @@ public:
         int val;
         val = cpu.getReg(getDest()) + cpu.getReg(getSrc());
         cpu.setReg(getDest(), val);
-        flags.updateFlags(flags, val);
+        cpu.updateFlags(val);
     }
 };
 
@@ -294,7 +303,7 @@ public:
         int val;
         val = cpu.getReg(getDest()) - cpu.getReg(getSrc());
         cpu.setReg(getDest(), val);
-        flags.updateFlags(flags, val);
+        cpu.updateFlags(val);
     }
 };
 
@@ -305,7 +314,7 @@ public:
         int val;
         val = cpu.getReg(getDest()) * cpu.getReg(getSrc());
         cpu.setReg(getDest(), val);
-        flags.updateFlags(flags, val);
+        cpu.updateFlags(val);
     }
 };
 
@@ -316,7 +325,7 @@ public:
         int val;
         val = cpu.getReg(getDest()) / cpu.getReg(getSrc());
         cpu.setReg(getDest(), val);
-        flags.updateFlags(flags, val);
+        cpu.updateFlags(val);
     }
 };
 
@@ -401,6 +410,22 @@ public:
     }
 };
 
+class Push : public StackIns {
+public:
+    Push(int d) : StackIns(d) {}
+    void execute(CPU& cpu) override {
+        cpu.pushStack(cpu.getReg(getDest()));
+    }
+};
+
+class Pop : public StackIns {
+public:
+    Pop(int d) : StackIns(d) {}
+    void execute(CPU& cpu) override {
+        cpu.setReg(getDest(), cpu.popStack());
+    }
+};
+
 class ResetFlag : public Instruction {
 private:
     string val;
@@ -410,13 +435,13 @@ public:
     ResetFlag(string v) : val(v) {}
     void execute(CPU& cpu) override {
         if (getVal() == "CF")
-            flags.setCF(false);
+            cpu.setCF(false);
         else if (getVal() == "UF")
-            flags.setUF(false);
+            cpu.setUF(false);
         else if (getVal() == "OF")
-            flags.setOF(false);
+            cpu.setOF(false);
         else if (getVal() == "ZF")
-            flags.setZF(false);
+            cpu.setZF(false);
         else {
             cout << "Unknown Flag: " << val << "\n";
             exit(EXIT_FAILURE);
