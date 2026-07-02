@@ -146,7 +146,7 @@ class Memory {
 
 class Instruction {
 public:
-    virtual void execute(Register& reg, Memory& mem, Flags& flags) = 0;   // pure virtual
+    virtual void execute(CPU& cpu) = 0;   // pure virtual
     virtual ~Instruction() {}             // always virtual destructor
 };
 
@@ -205,23 +205,23 @@ public:
 class Input : public IOIns {
 public:
     Input(int d) : IOIns(d) {}
-    void execute(Register& reg, Memory& mem, Flags& flags) override {
+    void execute(CPU& cpu) override {
         int num;
         do {
             cout << "? ";
             cin >> num;
         } while (num < -128 || num > 127);
         
-        reg.setRegister(getDest(), num);
+        cpu.setReg(getDest(), num);
     }
 };
 
 class Display : public IOIns {
 public:
     Display(int d) : IOIns(d) {}
-    void execute(Register& reg, Memory& mem, Flags& flags) override {
+    void execute(CPU& cpu) override {
         int num;
-        num = reg.getRegister(getDest());
+        num = cpu.getReg(getDest());
         cout << "R" << getDest() << endl;
         cout << num << endl;
     }
@@ -230,36 +230,36 @@ public:
 class Move : public DataTransIns {
 public:
     Move(int d, int s) : DataTransIns(d, s) {}
-    void execute(Register& reg, Memory& mem, Flags& flags) override {
-        reg.setRegister(getDest(), getSrc());
+    void execute(CPU& cpu) override {
+        cpu.setReg(getDest(), getSrc());
     }
 };
 
 class Load : public DataTransIns {
 public:
     Load(int d, int s) : DataTransIns(d, s) {}
-    void execute(Register& reg, Memory& mem, Flags& flags) override {
-        reg.setRegister(getDest(), getSrc());
+    void execute(CPU& cpu) override {
+        cpu.setReg(getDest(), getSrc());
     }
 };
 
 class Store : public DataTransIns {
 public:
     Store(int d, int s) : DataTransIns(d, s) {}
-    void execute(Register& reg, Memory& mem, Flags& flags) override {
+    void execute(CPU& cpu) override {
         int val;
-        val = reg.getRegister(getDest());
-        mem.setMemory(getSrc(), val);
+        val = cpu.getReg(getDest());
+        cpu.setMem(getSrc(), val);
     }
 };
 
 class Inc : public IncrIns {
 public:
     Inc(int d) : IncrIns(d) {}
-    void execute(Register& reg, Memory& mem, Flags& flags) override {
+    void execute(CPU& cpu) override {
         int val;
-        val = reg.getRegister(getDest()) + 1;
-        reg.setRegister(getDest(), val);
+        val = cpu.getReg(getDest()) + 1;
+        cpu.setReg(getDest(), val);
         flags.updateFlags(flags, val);
     }
 };
@@ -267,10 +267,10 @@ public:
 class Dsc : public IncrIns {
 public:
     Dsc(int d) : IncrIns(d) {}
-    void execute(Register& reg, Memory& mem, Flags& flags) override {
+    void execute(CPU& cpu) override {
         int val;
-        val = reg.getRegister(getDest()) - 1;
-        reg.setRegister(getDest(), val);
+        val = cpu.getReg(getDest()) - 1;
+        cpu.setReg(getDest(), val);
         flags.updateFlags(flags, val);
     }
 };
@@ -278,10 +278,10 @@ public:
 class Add : public ArithmeticIns {
 public:
     Add(int d, int s) : ArithmeticIns(d, s) {}
-    void execute(Register& reg, Memory& mem, Flags& flags) override {
+    void execute(CPU& cpu) override {
         int val;
-        val = reg.getRegister(getDest()) + reg.getRegister(getSrc());
-        reg.setRegister(getDest(), val);
+        val = cpu.getReg(getDest()) + cpu.getReg(getSrc());
+        cpu.setReg(getDest(), val);
         flags.updateFlags(flags, val);
     }
 };
@@ -289,10 +289,10 @@ public:
 class Sub : public ArithmeticIns {
 public:
     Sub(int d, int s) : ArithmeticIns(d, s) {}
-    void execute(Register& reg, Memory& mem, Flags& flags) override {
+    void execute(CPU& cpu) override {
         int val;
-        val = reg.getRegister(getDest()) - reg.getRegister(getSrc());
-        reg.setRegister(getDest(), val);
+        val = cpu.getReg(getDest()) - cpu.getReg(getSrc());
+        cpu.setReg(getDest(), val);
         flags.updateFlags(flags, val);
     }
 };
@@ -300,10 +300,10 @@ public:
 class Mul : public ArithmeticIns {
 public:
     Mul(int d, int s) : ArithmeticIns(d, s) {}
-    void execute(Register& reg, Memory& mem, Flags& flags) override {
+    void execute(CPU& cpu) override {
         int val;
-        val = reg.getRegister(getDest()) * reg.getRegister(getSrc());
-        reg.setRegister(getDest(), val);
+        val = cpu.getReg(getDest()) * cpu.getReg(getSrc());
+        cpu.setReg(getDest(), val);
         flags.updateFlags(flags, val);
     }
 };
@@ -311,10 +311,10 @@ public:
 class Div : public ArithmeticIns {
 public:
     Div(int d, int s) : ArithmeticIns(d, s) {}
-    void execute(Register& reg, Memory& mem, Flags& flags) override {
+    void execute(CPU& cpu) override {
         int val;
-        val = reg.getRegister(getDest()) / reg.getRegister(getSrc());
-        reg.setRegister(getDest(), val);
+        val = cpu.getReg(getDest()) / cpu.getReg(getSrc());
+        cpu.setReg(getDest(), val);
         flags.updateFlags(flags, val);
     }
 };
@@ -324,9 +324,9 @@ class ShLIns : public ShiftIns {
 public:
     ShLIns(int d, int c) : ShiftIns(d, c) {}
 
-    void execute(Register& reg, Memory& mem, Flags& flags) override {
+    void execute(CPU& cpu) override {
         int bits[8];
-        toBinary(reg.getRegister(getDest()), bits);
+        toBinary(cpu.getReg(getDest()), bits);
 
         for (int i = 0; i < getCount(); i++) {
             // shift every bit left by 1, LSB (index 7) fills with 0
@@ -336,7 +336,7 @@ public:
         }
 
         signed char result = fromBinary(bits);
-        reg.setRegister(getDest(), result);
+        cpu.setReg(getDest(), result);
     }
 };
 
@@ -344,9 +344,9 @@ class ShRIns : public ShiftIns {
 public:
     ShRIns(int d, int c) : ShiftIns(d, c) {}
 
-    void execute(Register& reg, Memory& mem, Flags& flags) override {
+    void execute(CPU& cpu) override {
         int bits[8];
-        toBinary(reg.getRegister(getDest()), bits);
+        toBinary(cpu.getReg(getDest()), bits);
 
         for (int i = 0; i < getCount(); i++) {
             // shift every bit right by 1, MSB (index 0) fills with 0
@@ -356,7 +356,7 @@ public:
         }
 
         signed char result = fromBinary(bits);
-        reg.setRegister(getDest(), result);
+        cpu.setReg(getDest(), result);
     }
 };
 
@@ -364,9 +364,9 @@ class RoLIns : public ShiftIns {
 public:
     RoLIns(int d, int c) : ShiftIns(d, c) {}
 
-    void execute(Register& reg, Memory& mem, Flags& flags) override {
+    void execute(CPU& cpu) override {
         int bits[8];
-        toBinary(reg.getRegister(getDest()), bits);
+        toBinary(cpu.getReg(getDest()), bits);
 
         for (int i = 0; i < getCount(); i++) {
             int msb = bits[0];            // save MSB before shifting
@@ -376,7 +376,7 @@ public:
         }
 
         signed char result = fromBinary(bits);
-        reg.setRegister(getDest(), result);
+        cpu.setReg(getDest(), result);
     }
 };
 
@@ -384,9 +384,9 @@ class RoRIns : public ShiftIns {
 public:
     RoRIns(int d, int c) : ShiftIns(d, c) {}
 
-    void execute(Register& reg, Memory& mem, Flags& flags) override {
+    void execute(CPU& cpu) override {
         int bits[8];
-        toBinary(reg.getRegister(getDest()), bits);
+        toBinary(cpu.getReg(getDest()), bits);
 
         for (int i = 0; i < getCount(); i++) {
             int lsb = bits[7];            // save LSB before shifting
@@ -396,7 +396,7 @@ public:
         }
 
         signed char result = fromBinary(bits);
-        reg.setRegister(getDest(), result);
+        cpu.setReg(getDest(), result);
     }
 };
 
@@ -407,7 +407,7 @@ protected:
     string getVal() {return val;}
 public:
     ResetFlag(string v) : val(v) {}
-    void execute(Register& reg, Memory& mem, Flags& flags) override {
+    void execute(CPU& cpu) override {
         if (getVal() == "CF")
             flags.setCF(false);
         else if (getVal() == "UF")
