@@ -14,7 +14,7 @@ class Registers {
             R[i] = 0;
     }
 
-    int8_t getRegister (int pos) {
+    int8_t static getRegister (int pos) {
         return R[pos];
     }
 
@@ -34,7 +34,7 @@ class Memory {
         M[i] = 0;
     }
 
-    int8_t getMemory ( int pos ) {
+    int8_t static getMemory ( int pos ) {
         return M[pos];
     }
 
@@ -131,10 +131,37 @@ class StackIndex {
     }
 };
 
-class CPU () {
+class CPU {
+    private:
+    Registers reg;
+    Memory mem;
+    Flags flags;
+    ProgramCounter PC;
+    customStack CS;
+    
+    public:
 
-}
+    CPU () {};
+    // Registers focus
+    void setReg( int pos, int value) { reg.setRegister(pos, value); };
+    int8_t getReg(int pos) { return reg.getRegister(pos); };
+
+    // Memory focus
+    void setMem (int pos, int value) { mem.setMemory(pos, value); };
+    int8_t getMem( int pos ) { return mem.getMemory(pos); };
+
+    // PC focus
+    int8_t getPC() { return PC.getPC(); };
+    void incrementPC() { PC.IncPC(); };
+    
+    // Flags focus
+    bool getUF () { return flags.getUF(); };
+    bool getOF () { return flags.getOF(); };
+    bool getZF () { return flags.getZF(); };
+    bool getCF () { return flags.getCF(); };
+    
+};
+
 int main(){
-
     return 0;
 }
