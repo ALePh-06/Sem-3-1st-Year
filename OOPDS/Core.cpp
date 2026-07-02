@@ -131,11 +131,6 @@ class StackIndex {
     }
 };
 
-<<<<<<< HEAD
-class CPU () {
-    
-}
-=======
 class CPU {
     private:
     Registers reg;
@@ -167,7 +162,6 @@ class CPU {
     
 };
 
->>>>>>> main
 int main(){
     return 0;
 }
