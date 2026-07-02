@@ -10,8 +10,8 @@ class customVector {
     int size; 
     int capacity;
 //doubles size of an array when its full, but basically move the old array to fit the new one
-    void resize(){
-
+    void resize()
+    {
         capacity *= 2;
         T* newData = new T[capacity];
         for (int i=0; i<size; i++)
@@ -79,19 +79,23 @@ template <typename T>
 class customQueue
 {
     private:
-    struct node 
+    struct Node 
     {
         T val;
-        node* next;
+        Node* next;
         Node(T v) : val(v), next(nullptr) {}
     };
-    node* front; //point first item to remove
-    node*rear; //point last item to add
+    Node* front; //point first item to remove
+    Node* rear; //point last item to add
     int size;
 
     public:
-    customQueue :front(nullptr),rear(nullptr),size(0){}
-
+    customQueue() :front(nullptr),rear(nullptr),size(0){}
+    
+        ~customQueue() 
+        {
+        while (!isEmpty()) dequeue();
+        }
     void enqueue(T val)
     {
        Node* n = new Node(val);
@@ -103,7 +107,8 @@ class customQueue
     {
         if (!front) 
         { 
-            cout << "Queue empty." << endl; exit(1);
+            cout << "Queue empty." << endl; 
+            exit(1);
         }
         T val = front->val; // saving values
         Node* temp = front; //save pointer to  be deleted
@@ -119,9 +124,8 @@ class customQueue
 
 //MOV LOAD STORE PUSH POP
 //foward declare CPU so it can be referred
-//instruction command is a placeholder for the 3rd guy to replace
-'''must replace the [placeholder] into person 3 class to be referred'''
-class MovIns : public placeholder {
+
+class MovIns : public Instruction {
 private:
     string dest;  // e.g. "R0"
     string src;   // e.g. "10", "R1", "[R1]"
@@ -129,29 +133,35 @@ private:
 public:
     MovIns(string d, string s) : dest(d), src(s) {}
 
-    void execute(CPU& cpu) override {
+    void execute(CPU& cpu) override 
+    {
         int destIdx = dest[1] - '0';  // "R3" → 3
 
         if (src[0] == '[') {
             // MOV R3, [R1] — indirect: R1 holds memory address
             int srcIdx = src[2] - '0';
-            int addr = cpu.getRegister(srcIdx);
-            cpu.setRegister(destIdx, cpu.getMemory(addr));
+            int addr = cpu.getRegisters().getRegister(srcIdx);
+            cpu.getRegisters().setRegister(destIdx, cpu.getMemory().getMemory(addr));
 
-        } else if (src[0] == 'R') {
+        } 
+        else if (src[0] == 'R') 
+        {
             // MOV R0, R1 — register to register
             int srcIdx = src[1] - '0';
-            cpu.setRegister(destIdx, cpu.getRegister(srcIdx));
+            cpu.getRegisters().setRegister(destIdx, cpu.getRegisters().getRegister(srcIdx));
 
-        } else {
+        } 
+        else 
+        {
             // MOV R0, 10 — immediate value
-            cpu.setRegister(destIdx, (signed char)stoi(src));
+            cpu.getRegisters().setRegister(destIdx, (signed char)stoi(src));
         }
     }
+    
 };
 
 
-class LoadIns : public placeholder {
+class LoadIns : public Instruction {
 private:
     string dest;  // e.g. "R1"
     string src;   // e.g. "[20]" or "[R2]"
@@ -164,19 +174,24 @@ public:
         // strip the [ ] brackets
         string inner = src.substr(1, src.size() - 2);
 
-        if (inner[0] == 'R') {
+        if (inner[0] == 'R') 
+        {
             // LOAD R1, [R2] — address is stored in R2
             int srcIdx = inner[1] - '0';
-            cpu.setRegister(destIdx, cpu.getMemory(cpu.getRegister(srcIdx)));
-        } else {
+            int addr = cpu.getRegisters().getRegister(srcIdx);
+            cpu.getRegisters().setRegister(destIdx, cpu.getMemory().getMemory(addr));
+        } 
+        else 
+        {
             // LOAD R1, [20] — address is the number directly
-            cpu.setRegister(destIdx, cpu.getMemory(stoi(inner)));
+            cpu.getRegisters().setRegister(destIdx, cpu.getMemory().getMemory(stoi(inner)));
         }
     }
 };
 
 
-class StoreIns : public placeholder {
+class StoreIns : public Instruction 
+{
 private:
     string dest;  // e.g. "R1" or "[R2]"
     string src;   // e.g. "43" or "R1"
@@ -184,47 +199,55 @@ private:
 public:
     StoreIns(string d, string s) : dest(d), src(s) {}
 
-    void execute(CPU& cpu) override {
-        if (dest[0] == '[') {
+   void execute(CPU& cpu) override 
+   {
+        if (dest[0] == '[') 
+        {
             // STORE [R2], R1 — address is in R2, value is in R1
             int addrIdx = dest[2] - '0';
             int srcIdx = src[1] - '0';
-            cpu.setMemory(cpu.getRegister(addrIdx), cpu.getRegister(srcIdx));
-        } else {
+            int addr = cpu.getRegisters().getRegister(addrIdx);
+            cpu.getMemory().setMemory(addr, cpu.getRegisters().getRegister(srcIdx));
+        } 
+        else 
+        {
             // STORE R1, 43 — value is in R1, address is 43
             int srcIdx = dest[1] - '0';
             int addr = stoi(src);
-            cpu.setMemory(addr, cpu.getRegister(srcIdx));
+            cpu.getMemory().setMemory(addr, cpu.getRegisters().getRegister(srcIdx));
         }
     }
 };
 
 
-class PushIns : public placeholder {
+class PushIns : public Instruction 
+{
 private:
     string reg;  // e.g. "R0"
 
 public:
     PushIns(string r) : reg(r) {}
 
-    void execute(CPU& cpu) override {
+    void execute(CPU& cpu) override 
+    {
         int idx = reg[1] - '0';
-        cpu.getStack().push(cpu.getRegister(idx));
-        cpu.incSI();  // SI tracks how many items are on stack
+        cpu.getStack().push(cpu.getRegisters().getRegister(idx));
+        cpu.getSI().IncSI();   // SI tracks how many items are on stack
     }
 };
 
 
-class PopIns : public placeholder {
+class PopIns : public Instruction {
 private:
     string reg;  // e.g. "R0"
 
 public:
     PopIns(string r) : reg(r) {}
 
-    void execute(CPU& cpu) override {
+    void execute(CPU& cpu) override 
+    {
         int idx = reg[1] - '0';
-        cpu.setRegister(idx, cpu.getStack().pop());
-        cpu.decSI();
+        cpu.getRegisters().setRegister(idx, cpu.getStack().pop());
+        cpu.getSI().DecSI();
     }
 };
