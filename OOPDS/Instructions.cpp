@@ -138,13 +138,13 @@ public:
     DataTransIns(int d, int s) : dest(d), src(s) {}
 };
 
-class OneAddIns : public Instruction {
+class IncrIns : public Instruction {
 private:
     int dest;
 protected:
     int getDest() {return dest;}
 public:
-    OneAddIns(int d) : dest(d) {}
+    IncrIns(int d) : dest(d) {}
 };
 
 class ArithmeticIns : public Instruction {
@@ -168,7 +168,6 @@ protected:
     int getCount() {return count;}
 public:
     ShiftIns(int d, int c) : dest(d), count(c) {}
-    virtual void execute(CPU& cpu) = 0;
 };
 
 class Input : public IOIns {
@@ -222,9 +221,9 @@ public:
     }
 };
 
-class Inc : public OneAddIns {
+class Inc : public IncrIns {
 public:
-    Inc(int d) : OneAddIns(d) {}
+    Inc(int d) : IncrIns(d) {}
     void execute(CPU& cpu) override {
         int val;
         val = Register.getRegister(getDest()) + 1;
@@ -233,9 +232,9 @@ public:
     }
 };
 
-class Dsc : public OneAddIns {
+class Dsc : public IncrIns {
 public:
-    Dsc(int d) : OneAddIns(d) {}
+    Dsc(int d) : IncrIns(d) {}
     void execute(CPU& cpu) override {
         int val;
         val = Register.getRegister(getDest()) - 1;
