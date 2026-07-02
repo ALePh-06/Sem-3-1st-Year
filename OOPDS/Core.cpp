@@ -14,7 +14,7 @@ class Registers {
             R[i] = 0;
     }
 
-    int8_t getRegister (int pos) {
+    int8_t static getRegister (int pos) {
         return R[pos];
     }
 
@@ -34,7 +34,7 @@ class Memory {
         M[i] = 0;
     }
 
-    int8_t getMemory ( int pos ) {
+    int8_t static getMemory ( int pos ) {
         return M[pos];
     }
 
@@ -132,7 +132,7 @@ class StackIndex {
 };
 
 class CPU () {
-
+    
 }
 int main(){
 
