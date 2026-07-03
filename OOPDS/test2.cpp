@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <fstream>
 #include <string>
+#include <sstream>
 
 using namespace std;
 
@@ -356,11 +357,32 @@ public:
     Input(int d) : IOIns(d) {}
     void execute(CPU& cpu) override {
         int num;
-        do {
+        string line;
+
+        while (true) {
             cout << "? ";
-            cin >> num;
-        } while (num < -128 || num > 127);
-        
+            getline(cin, line);
+
+            stringstream ss(line);
+
+            // Read an integer
+            if (!(ss >> num)) {
+                cout << "Error: Invalid input. Expected an integer." << endl;
+                exit(EXIT_FAILURE);
+            }
+
+            // If anything remains, it's invalid
+            char extra;
+            if (ss >> extra) {
+                cout << "Error: Invalid input. Expected an integer." << endl;
+                exit(EXIT_FAILURE);
+            }
+
+            if (num >= -128 && num <= 127)
+                break;
+
+            cout << "Out of range (-128 to 127). Try again." << endl;
+        }
         cpu.setReg(getDest(), num);
     }
 };
@@ -1037,6 +1059,7 @@ int main()
 
     cout << "Enter output result file in format (.asm): ";
     cin >> outputFile;
+    cin.ignore();
 
     Runner runner(inputFile, outputFile);
     runner.run();
