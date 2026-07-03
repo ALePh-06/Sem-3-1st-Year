@@ -24,6 +24,7 @@ signed char fromBinary(int bits[8]) {
     return (signed char)result;
 }
 
+// Yeap
 class customStack {
 private:
     signed char data[8]; //creats 8 slots, one per byte
@@ -58,7 +59,7 @@ signed char pop() {
 
 //Custom Queue
 //storing program instructions before execution
-
+// Yeap
 template <typename T>
 class customQueue
 {
@@ -106,8 +107,7 @@ class customQueue
     int getSize() { return size; }
 };
 
-// Start Muiz part //
-// ========================================================================================================= //
+// Muiz
 class Registers {
 
     private:
@@ -129,6 +129,7 @@ class Registers {
     } 
 };
 
+// Muiz
 class Memory {
     private:
     int8_t M[64];  // to make 64 spaces in an array, signed 1 byte
@@ -150,6 +151,7 @@ class Memory {
 
 };
 
+// Muiz
 class Flags {
     private:
     bool UF = false, OF = false, ZF = false, CF = false;  
@@ -196,6 +198,7 @@ class Flags {
 }
 };
 
+// Muiz
 class ProgramCounter {
     private:
     uint8_t PC;
@@ -215,7 +218,7 @@ class ProgramCounter {
     }
 };
 
-
+// Muiz
 class StackIndex {
     private:
     uint8_t SI;
@@ -239,7 +242,8 @@ class StackIndex {
     }
 };
 
-class CPU {         // to initialise and combine every core classes into one
+// Muiz
+class CPU {
     private:
     Registers reg;
     Memory mem;
@@ -363,29 +367,23 @@ public:
     void execute(CPU& cpu) override {
         int num;
         string line;
-
         while (true) {
             cout << "? ";
             getline(cin, line);
-
             stringstream ss(line);
-
             // Read an integer
             if (!(ss >> num)) {
                 cout << "Error: Invalid input. Expected an integer." << endl;
                 exit(EXIT_FAILURE);
             }
-
             // If anything remains, it's invalid
             char extra;
             if (ss >> extra) {
                 cout << "Error: Invalid input. Expected an integer." << endl;
                 exit(EXIT_FAILURE);
             }
-
             if (num >= -128 && num <= 127)
                 break;
-
             cout << "Out of range (-128 to 127). Try again." << endl;
         }
         cpu.setReg(getDest(), num);
@@ -631,6 +629,7 @@ public:
     }
 };
 
+// Andy
 class Helper
 {
 private:
@@ -643,7 +642,7 @@ public:
     int resolveValueReg(string operand, CPU& cpu);
     int resolveAddressReg(string operand, CPU& cpu);
 };
-
+// Andy
 int Helper::getRegisterNumber(string operand)
 {
     for (int i = 0; i < operand.length(); i++)
@@ -654,20 +653,36 @@ int Helper::getRegisterNumber(string operand)
 
     return -1;
 }
-
+// Andy
 int Helper::stringToInt(string str)
 {
     int num = 0;
-
-    for (int i = 0; i < str.length(); i++)
+    int sign = 1;
+    int i = 0;
+    // Skip leading spaces
+    while (i < str.length() && str[i] == ' ')
+        i++;
+    // Handle optional sign
+    if (i < str.length())
     {
-        if (str[i] >= '0' && str[i] <= '9')
-            num = num * 10 + (str[i] - '0');
+        if (str[i] == '-')
+        {
+            sign = -1;
+            i++;
+        }
+        else if (str[i] == '+')
+        {
+            i++;
+        }
     }
-
-    return num;
+    while (i < str.length() && str[i] >= '0' && str[i] <= '9')
+    {
+        num = num * 10 + (str[i] - '0');
+        i++;
+    }
+    return sign * num;
 }
-
+// Andy
 bool Helper::isRegister(string operand)
 {
     if (operand.length() == 2 && operand[0] == 'R')
@@ -678,7 +693,7 @@ bool Helper::isRegister(string operand)
 
     return false;
 }
-
+// Andy
 bool Helper::isImmediate(string operand)
 {
     bool hasDigit = false;
@@ -693,7 +708,7 @@ bool Helper::isImmediate(string operand)
 
     return hasDigit;
 }
-
+// Andy
 int Helper::resolveValueReg(string operand, CPU& cpu)
 {
     if (operand.find('[') != -1)
@@ -711,7 +726,7 @@ int Helper::resolveValueReg(string operand, CPU& cpu)
 
     return stringToInt(operand);
 }
-
+// Andy
 int Helper::resolveAddressReg(string operand, CPU& cpu)
 {   
     if (operand.find('R') != -1)
@@ -741,6 +756,7 @@ private:
 public:
     Instruction* parse(string line, CPU& cpu);
 };
+// Andy
 string Parser::getCommand(string line)
 {
     int spacePos = line.find(' ');
@@ -750,7 +766,7 @@ string Parser::getCommand(string line)
 
     return line.substr(0, spacePos);
 }
-
+// Andy
 string Parser::getFirstOperand(string line)
 {
     int spacePos = line.find(' ');
@@ -764,7 +780,7 @@ string Parser::getFirstOperand(string line)
 
     return line.substr(spacePos + 1, commaPos - spacePos - 1);
 }
-
+// Andy
 string Parser::getSecondOperand(string line)
 {
     int commaPos = line.find(',');
@@ -774,7 +790,7 @@ string Parser::getSecondOperand(string line)
 
     return line.substr(commaPos + 1);
 }
-
+// Andy
 int Parser::getRegisterNumber(string reg)
 {
     for (int i = 0; i < reg.length(); i++)
@@ -785,24 +801,37 @@ int Parser::getRegisterNumber(string reg)
 
     return -1;
 }
-
+// Andy
 int Parser::stringToInt(string str)
 {
     int num = 0;
     int i = 0;
-
+    int sign = 1;
+    // Skip leading spaces
     while (i < str.length() && str[i] == ' ')
         i++;
-
-    for (; i < str.length(); i++)
+    // Check for optional sign
+    if (i < str.length())
     {
-        if (str[i] >= '0' && str[i] <= '9')
-            num = num * 10 + (str[i] - '0');
+        if (str[i] == '-')
+        {
+            sign = -1;
+            i++;
+        }
+        else if (str[i] == '+')
+        {
+            i++;
+        }
     }
-
-    return num;
+    // Read digits
+    while (i < str.length() && str[i] >= '0' && str[i] <= '9')
+    {
+        num = num * 10 + (str[i] - '0');
+        i++;
+    }
+    return sign * num;
 }
-
+// Andy
 Instruction* Parser::parse(string line, CPU& cpu)
 {
     string cmd = getCommand(line); string op1 = getFirstOperand(line); string op2 = getSecondOperand(line);
@@ -836,7 +865,7 @@ Instruction* Parser::parse(string line, CPU& cpu)
     return nullptr;
 }
 
-
+// Andy
 class Runner
 {
 private:
@@ -861,13 +890,13 @@ public:
     void decodeAndExecute(string line);
     void printFourDigits(ofstream& out, int value);
 };
-
+// Andy
 Runner::Runner(string input, string output)
 {
     inputFile = input;
     outputFile = output;
 }
-
+// Andy
 void Runner::run()
 {
     readFile();
@@ -875,12 +904,12 @@ void Runner::run()
     printOutput();
     saveOutput();
 }
-
+// Andy
 bool Runner::isEmptyLine(string line)
 {
     return line.length() == 0;
 }
-
+// Andy
 void Runner::readFile()
 {
     ifstream infile;
@@ -904,7 +933,7 @@ void Runner::readFile()
 
     infile.close();
 }
-
+// Andy
 void Runner::executeProgram()
 {
     while (!instructionQueue.isEmpty())
@@ -916,7 +945,7 @@ void Runner::executeProgram()
         cpu.incrementPC();    // 
     }
 }
-
+// Andy
 void Runner::decodeAndExecute(string line)
 {
     Instruction* instr = parser.parse(line, cpu);
@@ -930,7 +959,7 @@ void Runner::decodeAndExecute(string line)
     instr->execute(cpu);
     delete instr;
 }
-
+// Andy
 void Runner::printOutput()
 {
     cout << endl;
@@ -938,7 +967,7 @@ void Runner::printOutput()
     cout << "Instructions executed: ";
     cout << (int)cpu.getPC() << endl;
 }
-
+// Andy
 void Runner::saveOutput()
 {
     ofstream out;
@@ -955,7 +984,7 @@ void Runner::saveOutput()
 
     out.close();
 }
-
+// Andy
 void Runner::printFourDigits(ofstream& out, int value)
 {   
 
@@ -974,7 +1003,7 @@ void Runner::printFourDigits(ofstream& out, int value)
 
     out << value;
 }
-
+// Andy
 void Runner::writeFinalOutput(ofstream& out)
 {
     out << "#Begin#" << endl;
