@@ -1,5 +1,8 @@
 #include <iostream>
 #include <cstdint>
+#include <fstream>
+#include <string>
+
 using namespace std;
 
 // Alif - Converts a signed byte to an 8-element int array (MSB at index 0)
@@ -601,12 +604,97 @@ public:
     }
 };
 
-#include <iostream>
-#include <fstream>
-#include <string>
+class Helper
+{
+private:
+    int getRegisterNumber(string operand);
+    int stringToInt(string str);
 
-using namespace std;
+public:
+    bool isRegister(string operand);
+    bool isImmediate(string operand);
+    int resolveValueReg(string operand, CPU& cpu);
+    int resolveAddressReg(string operand, CPU& cpu);
+};
 
+int Helper::getRegisterNumber(string operand)
+{
+    for (int i = 0; i < operand.length(); i++)
+    {
+        if (operand[i] >= '0' && operand[i] <= '7')
+            return operand[i] - '0';
+    }
+
+    return -1;
+}
+
+int Helper::stringToInt(string str)
+{
+    int num = 0;
+
+    for (int i = 0; i < str.length(); i++)
+    {
+        if (str[i] >= '0' && str[i] <= '9')
+            num = num * 10 + (str[i] - '0');
+    }
+
+    return num;
+}
+
+bool Helper::isRegister(string operand)
+{
+    if (operand.length() == 2 && operand[0] == 'R')
+    {
+        if (operand[1] >= '0' && operand[1] <= '7')
+            return true;
+    }
+
+    return false;
+}
+
+bool Helper::isImmediate(string operand)
+{
+    bool hasDigit = false;
+
+    for (int i = 0; i < operand.length(); i++)
+    {
+        if (operand[i] >= '0' && operand[i] <= '9')
+            hasDigit = true;
+        else if (operand[i] != ' ')
+            return false;
+    }
+
+    return hasDigit;
+}
+
+int Helper::resolveValueReg(string operand, CPU& cpu)
+{
+    if (operand.find('[') != -1)
+    {
+        int reg = getRegisterNumber(operand);
+        int address = cpu.getReg(reg);
+        return cpu.getMem(address);
+    }
+
+    if (operand.find('R') != -1)
+    {
+        int reg = getRegisterNumber(operand);
+        return cpu.getReg(reg);
+    }
+
+    return stringToInt(operand);
+}
+
+int Helper::resolveAddressReg(string operand, CPU& cpu)
+{
+    if (operand.find('R') != -1)
+    {
+        int reg = getRegisterNumber(operand);
+        return cpu.getReg(reg);
+    }
+
+    return stringToInt(operand);
+}
 
 // Andy
 
@@ -614,15 +702,17 @@ using namespace std;
 class Parser
 {
 private:
-    string getCommand(string line); //extracts the instuction
+    Helper helper;
+
+    string getCommand(string line);//extracts the instuction
     string getFirstOperand(string line);
     string getSecondOperand(string line);
-    int getRegisterNumber(string reg); //converts register string to register number contoh cm R3--> 3
+    int getRegisterNumber(string reg);//converts register string to register number contoh cm R3--> 3
     int stringToInt(string str);
-public:
-    Instruction* parse(string line);
-};
 
+public:
+    Instruction* parse(string line, CPU& cpu);
+};
 string Parser::getCommand(string line)
 {
     int spacePos = line.find(' ');
@@ -685,7 +775,7 @@ int Parser::stringToInt(string str)
     return num;
 }
 
-Instruction* Parser::parse(string line)
+Instruction* Parser::parse(string line, CPU& cpu)
 {
     string cmd = getCommand(line);
     string op1 = getFirstOperand(line);
@@ -693,6 +783,20 @@ Instruction* Parser::parse(string line)
 
     int dest = getRegisterNumber(op1);
     int src = getRegisterNumber(op2);
+
+    if (cmd == "MOV")
+{
+    int value = helper.resolveValueReg(op2, cpu);
+    return new Move(dest, value);
+}
+
+if (cmd == "LOAD")
+{
+    int address = helper.resolveAddressReg(op2, cpu);
+    int value = cpu.getMem(address);
+    return new Load(dest, value);
+}
+
 
     if (cmd == "ADD")
         return new Add(dest, src);
@@ -806,7 +910,7 @@ void Runner::executeProgram()
 
 void Runner::decodeAndExecute(string line)
 {
-    Instruction* instr = parser.parse(line);
+    Instruction* instr = parser.parse(line, cpu);
 
     if (instr == nullptr)
     {
