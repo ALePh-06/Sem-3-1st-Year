@@ -785,17 +785,25 @@ Instruction* Parser::parse(string line, CPU& cpu)
     int src = getRegisterNumber(op2);
 
     if (cmd == "MOV")
-{
-    int value = helper.resolveValueReg(op2, cpu);
-    return new Move(dest, value);
-}
+    {
+        int value = helper.resolveValueReg(op2, cpu);
+        return new Move(dest, value);
+    }
 
-if (cmd == "LOAD")
-{
-    int address = helper.resolveAddressReg(op2, cpu);
-    int value = cpu.getMem(address);
-    return new Load(dest, value);
-}
+    if (cmd == "LOAD")
+    {
+        int address = helper.resolveAddressReg(op2, cpu);
+        int value = cpu.getMem(address);
+        return new Load(dest, value);
+    }
+
+    if (cmd == "STORE")
+    {
+        int value = helper.resolveValueReg(op1, cpu);
+        int address = helper.resolveAddressReg(op2, cpu);
+
+        return new Store(value, address);
+    }
 
 
     if (cmd == "ADD")
