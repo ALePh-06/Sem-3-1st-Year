@@ -800,79 +800,35 @@ int Parser::stringToInt(string str)
 
 Instruction* Parser::parse(string line, CPU& cpu)
 {
-    string cmd = getCommand(line);
-    string op1 = getFirstOperand(line);
-    string op2 = getSecondOperand(line);
-
+    string cmd = getCommand(line); string op1 = getFirstOperand(line); string op2 = getSecondOperand(line);
     if (cmd == "RESET")
         return new ResetFlag(op1);
-
     int dest = getRegisterNumber(op1);
     int src = getRegisterNumber(op2);
 
-    if (cmd == "MOV")
-    {
-        int value = helper.resolveValueReg(op2, cpu);
-        return new Move(dest, value);
-    }
+    if (cmd == "MOV") { int value = helper.resolveValueReg(op2, cpu); return new Move(dest, value); }
 
     if (cmd == "LOAD")
-    {
-        int address = helper.resolveAddressReg(op2, cpu);
-        int value = cpu.getMem(address);
-        return new Load(dest, value);
-    }
+    { int address = helper.resolveAddressReg(op2, cpu); int value = cpu.getMem(address); return new Load(dest, value); }
 
     if (cmd == "STORE")
-    {
-        int value = helper.resolveValueReg(op1, cpu);
-        int address = helper.resolveAddressReg(op2, cpu);
+    { int value = helper.resolveValueReg(op1, cpu); int address = helper.resolveAddressReg(op2, cpu); return new Store(value, address); }
 
-        return new Store(value, address);
-    }
-
-    if (cmd == "SHL")
-        return new ShLIns(dest, src);
-
-    if (cmd == "SHR")
-        return new ShRIns(dest, src);
-
-    if (cmd == "ROL")
-        return new RoLIns(dest, src);
-
-    if (cmd == "ROR")
-        return new RoRIns(dest, src);
-
-    if (cmd == "PUSH")
-        return new Push(dest);
-
-    if (cmd == "POP")
-        return new Pop(dest);
-
-    if (cmd == "ADD")
-        return new Add(dest, src);
-
-    if (cmd == "SUB")
-        return new Sub(dest, src);
-
-    if (cmd == "MUL")
-        return new Mul(dest, src);
-
-    if (cmd == "DIV")
-        return new Div(dest, src);
-
-    if (cmd == "INC")
-        return new Inc(dest);
-
-    if (cmd == "DEC")
-        return new Dsc(dest);
-
-    if (cmd == "DISPLAY")
-        return new Display(dest);
-
-    if (cmd == "INPUT")
-        return new Input(dest);
-
+    if (cmd == "SHL") return new ShLIns(dest, src);
+    if (cmd == "SHR") return new ShRIns(dest, src);
+    if (cmd == "ROL") return new RoLIns(dest, src);
+    if (cmd == "ROR") return new RoRIns(dest, src);
+    if (cmd == "PUSH") return new Push(dest);
+    if (cmd == "POP") return new Pop(dest);
+    if (cmd == "ADD") return new Add(dest, src);
+    if (cmd == "SUB") return new Sub(dest, src);
+    if (cmd == "MUL") return new Mul(dest, src);
+    if (cmd == "DIV") return new Div(dest, src);
+    if (cmd == "INC") return new Inc(dest);
+    if (cmd == "DEC") return new Dsc(dest);
+    if (cmd == "DISPLAY") return new Display(dest);
+    if (cmd == "INPUT") return new Input(dest);
+    
     return nullptr;
 }
 
