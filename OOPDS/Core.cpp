@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdint>
+#include <sstream>
 using namespace std;
 
 // Alif - Converts a signed byte to an 8-element int array (MSB at index 0)
@@ -300,13 +301,36 @@ public:
 class Input : public IOIns {
 public:
     Input(int d) : IOIns(d) {}
+
     void execute(CPU& cpu) override {
         int num;
-        do {
+        string line;
+
+        while (true) {
             cout << "? ";
-            cin >> num;
-        } while (num < -128 || num > 127);// Repeat until input is in range
-        
+            getline(cin, line);
+
+            stringstream ss(line);
+
+            // Read an integer
+            if (!(ss >> num)) {
+                cout << "Error: Invalid input. Expected an integer." << endl;
+                exit(EXIT_FAILURE);
+            }
+
+            // If anything remains, it's invalid
+            char extra;
+            if (ss >> extra) {
+                cout << "Error: Invalid input. Expected an integer." << endl;
+                exit(EXIT_FAILURE);
+            }
+
+            if (num >= -128 && num <= 127)
+                break;
+
+            cout << "Out of range (-128 to 127). Try again." << endl;
+        }
+
         cpu.setReg(getDest(), num);
     }
 };
