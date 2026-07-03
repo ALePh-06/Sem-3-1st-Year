@@ -653,14 +653,30 @@ int Helper::getRegisterNumber(string operand)
 int Helper::stringToInt(string str)
 {
     int num = 0;
-
-    for (int i = 0; i < str.length(); i++)
+    int sign = 1;
+    int i = 0;
+    // Skip leading spaces
+    while (i < str.length() && str[i] == ' ')
+        i++;
+    // Handle optional sign
+    if (i < str.length())
     {
-        if (str[i] >= '0' && str[i] <= '9')
-            num = num * 10 + (str[i] - '0');
+        if (str[i] == '-')
+        {
+            sign = -1;
+            i++;
+        }
+        else if (str[i] == '+')
+        {
+            i++;
+        }
     }
-
-    return num;
+    while (i < str.length() && str[i] >= '0' && str[i] <= '9')
+    {
+        num = num * 10 + (str[i] - '0');
+        i++;
+    }
+    return sign * num;
 }
 
 bool Helper::isRegister(string operand)
@@ -785,17 +801,30 @@ int Parser::stringToInt(string str)
 {
     int num = 0;
     int i = 0;
-
+    int sign = 1;
+    // Skip leading spaces
     while (i < str.length() && str[i] == ' ')
         i++;
-
-    for (; i < str.length(); i++)
+    // Check for optional sign
+    if (i < str.length())
     {
-        if (str[i] >= '0' && str[i] <= '9')
-            num = num * 10 + (str[i] - '0');
+        if (str[i] == '-')
+        {
+            sign = -1;
+            i++;
+        }
+        else if (str[i] == '+')
+        {
+            i++;
+        }
     }
-
-    return num;
+    // Read digits
+    while (i < str.length() && str[i] >= '0' && str[i] <= '9')
+    {
+        num = num * 10 + (str[i] - '0');
+        i++;
+    }
+    return sign * num;
 }
 
 Instruction* Parser::parse(string line, CPU& cpu)
