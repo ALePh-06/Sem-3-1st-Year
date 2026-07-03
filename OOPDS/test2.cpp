@@ -855,9 +855,6 @@ Instruction* Parser::parse(string line, CPU& cpu)
 }
 
 
-
-
-
 class Runner
 {
 private:
@@ -880,6 +877,7 @@ public:
     void printOutput();
     void saveOutput();
     void decodeAndExecute(string line);
+    void printFourDigits(ofstream& out, int value);
 };
 
 Runner::Runner(string input, string output)
@@ -976,26 +974,51 @@ void Runner::saveOutput()
     out.close();
 }
 
+void Runner::printFourDigits(ofstream& out, int value)
+{   
+
+    if (value < 0)
+    {
+        out << "-";
+        value = -value;
+    }
+
+    if (value < 10)
+        out << "000";
+    else if (value < 100)
+        out << "00";
+    else if (value < 1000)
+        out << "0";
+
+    out << value;
+}
+
 void Runner::writeFinalOutput(ofstream& out)
 {
     out << "#Begin#" << endl;
 
     out << "#Registers#";
     for (int i = 0; i < 8; i++)
-        out << (int)cpu.getReg(i) << "#";
-    out << endl;
+    {
+        printFourDigits(out, (int)cpu.getReg(i));
+        out << "#";
+    }
 
+    out << endl;
     out << "#Flags#OF#" << cpu.getOF();
     out << "#UF#" << cpu.getUF();
     out << "#CF#" << cpu.getCF();
     out << "#ZF#" << cpu.getZF() << "#" << endl;
 
-    out << "#PC#" << (int)cpu.getPC() << "#" << endl;
+    out << "#PC#";
+    printFourDigits(out, (int)cpu.getPC());
+    out << "#" << endl;
 
     out << "#Memory#" << endl;
     for (int i = 0; i < 64; i++)
     {
-        out << "#" << (int)cpu.getMem(i);
+        out << "#";
+        printFourDigits(out, (int)cpu.getMem(i));
 
         if ((i + 1) % 8 == 0)
             out << "#" << endl;
