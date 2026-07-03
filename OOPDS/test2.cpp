@@ -727,8 +727,8 @@ int Helper::resolveValueReg(string operand, CPU& cpu)
     return stringToInt(operand);
 }
 // Andy
-int Helper::resolveAddressReg(string operand, CPU& cpu)
-{   
+int Helper::resolveAddressReg(string operand, CPU& cpu) //help resolve the adress operands for LOAD and STORE instructions
+{   //, if the operand is a register then it will return value of register as the address, if immediate value then it will return the immediate value as the address
     if (operand.find('R') != -1)
     {
         int reg = getRegisterNumber(operand);
@@ -742,7 +742,8 @@ int Helper::resolveAddressReg(string operand, CPU& cpu)
 // Andy
 
 // this is for parser
-class Parser
+// translates each assembly instruction into a instruction object which will be executed by the CPU
+class Parser 
 {
 private:
     Helper helper;
@@ -750,7 +751,7 @@ private:
     string getCommand(string line);//extracts the instuction
     string getFirstOperand(string line);
     string getSecondOperand(string line);
-    int getRegisterNumber(string reg);//converts register string to register number contoh cm R3--> 3
+    int getRegisterNumber(string reg);
     int stringToInt(string str);
 
 public:
@@ -767,7 +768,7 @@ string Parser::getCommand(string line)
     return line.substr(0, spacePos);
 }
 // Andy
-string Parser::getFirstOperand(string line)
+string Parser::getFirstOperand(string line) //Extracts the first operand after the instruction.
 {
     int spacePos = line.find(' ');
     int commaPos = line.find(',');
@@ -781,7 +782,7 @@ string Parser::getFirstOperand(string line)
     return line.substr(spacePos + 1, commaPos - spacePos - 1);
 }
 // Andy
-string Parser::getSecondOperand(string line)
+string Parser::getSecondOperand(string line) //extracts second operand
 {
     int commaPos = line.find(',');
 
@@ -791,7 +792,7 @@ string Parser::getSecondOperand(string line)
     return line.substr(commaPos + 1);
 }
 // Andy
-int Parser::getRegisterNumber(string reg)
+int Parser::getRegisterNumber(string reg) //converts register string to register number contoh cm R3--> 3
 {
     for (int i = 0; i < reg.length(); i++)
     {
@@ -802,8 +803,8 @@ int Parser::getRegisterNumber(string reg)
     return -1;
 }
 // Andy
-int Parser::stringToInt(string str)
-{
+int Parser::stringToInt(string str) //convert string to int
+{ 
     int num = 0;
     int i = 0;
     int sign = 1;
@@ -832,14 +833,15 @@ int Parser::stringToInt(string str)
     return sign * num;
 }
 // Andy
-Instruction* Parser::parse(string line, CPU& cpu)
-{
+Instruction* Parser::parse(string line, CPU& cpu) // main parser, determine instruction type and creat the appropriate instruction obj
+// ===== Flag instructions ======
+{ 
     string cmd = getCommand(line); string op1 = getFirstOperand(line); string op2 = getSecondOperand(line);
     if (cmd == "RESET")
         return new ResetFlag(op1);
     int dest = getRegisterNumber(op1);
     int src = getRegisterNumber(op2);
-
+   // ====== Memory instructions ======
     if (cmd == "MOV") { int value = helper.resolveValueReg(op2, cpu); return new Move(dest, value); }
 
     if (cmd == "LOAD")
@@ -848,25 +850,26 @@ Instruction* Parser::parse(string line, CPU& cpu)
     if (cmd == "STORE")
     { int value = helper.resolveValueReg(op1, cpu); int address = helper.resolveAddressReg(op2, cpu); return new Store(value, address); }
 
-    if (cmd == "SHL") return new ShLIns(dest, src);
-    if (cmd == "SHR") return new ShRIns(dest, src);
-    if (cmd == "ROL") return new RoLIns(dest, src);
-    if (cmd == "ROR") return new RoRIns(dest, src);
-    if (cmd == "PUSH") return new Push(dest);
-    if (cmd == "POP") return new Pop(dest);
-    if (cmd == "ADD") return new Add(dest, src);
+    if (cmd == "SHL") return new ShLIns(dest, src); // Start of Shift & Rotate Instructions
+    if (cmd == "SHR") return new ShRIns(dest, src); 
+    if (cmd == "ROL") return new RoLIns(dest, src); 
+    if (cmd == "ROR") return new RoRIns(dest, src); //End Shift & Rotate
+    if (cmd == "PUSH") return new Push(dest);       // Start of Stack Instructions
+    if (cmd == "POP") return new Pop(dest);         // End of Stack Instructions
+    if (cmd == "ADD") return new Add(dest, src);    // Start of Arithmetic Instructions
     if (cmd == "SUB") return new Sub(dest, src);
     if (cmd == "MUL") return new Mul(dest, src);
-    if (cmd == "DIV") return new Div(dest, src);
+    if (cmd == "DIV") return new Div(dest, src);    // End of Arithmetic Instructions
     if (cmd == "INC") return new Inc(dest);
     if (cmd == "DEC") return new Dsc(dest);
-    if (cmd == "DISPLAY") return new Display(dest);
-    if (cmd == "INPUT") return new Input(dest);
+    if (cmd == "DISPLAY") return new Display(dest); // Start of Input/Output Instructions
+    if (cmd == "INPUT") return new Input(dest);     // End of Input/Output Instructions
+    
     return nullptr;
 }
 
 // Andy
-class Runner
+class Runner //this class is to control the entire execution process 
 {
 private:
     string inputFile;
@@ -891,13 +894,13 @@ public:
     void printFourDigits(ofstream& out, int value);
 };
 // Andy
-Runner::Runner(string input, string output)
+Runner::Runner(string input, string output) //Initializes the Runner with the input and output filenames
 {
     inputFile = input;
     outputFile = output;
 }
 // Andy
-void Runner::run()
+void Runner::run() // execute the completed program workflow ; (read file, execute program, print output and save output)
 {
     readFile();
     executeProgram();
@@ -905,12 +908,12 @@ void Runner::run()
     saveOutput();
 }
 // Andy
-bool Runner::isEmptyLine(string line)
+bool Runner::isEmptyLine(string line) // check if a line from the input is empty or nah
 {
     return line.length() == 0;
 }
 // Andy
-void Runner::readFile()
+void Runner::readFile() // read the input file line by line and enqueue non-empty lines into the instruction queue
 {
     ifstream infile;
     string line;
@@ -934,7 +937,7 @@ void Runner::readFile()
     infile.close();
 }
 // Andy
-void Runner::executeProgram()
+void Runner::executeProgram() // executes every instruction in the queue (fifo order)
 {
     while (!instructionQueue.isEmpty())
     {
@@ -946,7 +949,7 @@ void Runner::executeProgram()
     }
 }
 // Andy
-void Runner::decodeAndExecute(string line)
+void Runner::decodeAndExecute(string line) // decodes the instruction line into an Instruction object and executes it on the CPU
 {
     Instruction* instr = parser.parse(line, cpu);
 
@@ -960,7 +963,7 @@ void Runner::decodeAndExecute(string line)
     delete instr;
 }
 // Andy
-void Runner::printOutput()
+void Runner::printOutput() // displays execution summary and number of instructions executed
 {
     cout << endl;
     cout << "Program finished." << endl;
@@ -968,7 +971,7 @@ void Runner::printOutput()
     cout << (int)cpu.getPC() << endl;
 }
 // Andy
-void Runner::saveOutput()
+void Runner::saveOutput() // saves the final state of the CPU (registers, flags, PC, memory) to the output file
 {
     ofstream out;
 
@@ -985,7 +988,7 @@ void Runner::saveOutput()
     out.close();
 }
 // Andy
-void Runner::printFourDigits(ofstream& out, int value)
+void Runner::printFourDigits(ofstream& out, int value) // prints an integer value as a 4-digit string with leading zeros, handling negative values
 {   
 
     if (value < 0)
@@ -1004,7 +1007,7 @@ void Runner::printFourDigits(ofstream& out, int value)
     out << value;
 }
 // Andy
-void Runner::writeFinalOutput(ofstream& out)
+void Runner::writeFinalOutput(ofstream& out) // writes the final state of the CPU to the output file in a structured format
 {
     out << "#Begin#" << endl;
 
