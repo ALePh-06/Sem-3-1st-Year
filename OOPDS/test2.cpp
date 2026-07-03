@@ -873,18 +873,16 @@ void Runner::writeFinalOutput(ofstream& out)
 
 int main()
 {
-    CPU cpu;
-
     string inputFile;
     string outputFile;
-    Runner runner(inputFile, outputFile);
 
     cout << "Enter input assembly file (.asm): ";
     cin >> inputFile;
 
-    cout << "Enter output result file (.asm): ";
+    cout << "Enter output result file: ";
     cin >> outputFile;
 
+    Runner runner(inputFile, outputFile);
     runner.run();
 
     cout << "\nProgram executed successfully." << endl;
