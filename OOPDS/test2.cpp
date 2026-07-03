@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <fstream>
 #include <string>
+#include <sstream>
 
 using namespace std;
 
@@ -23,6 +24,7 @@ signed char fromBinary(int bits[8]) {
     return (signed char)result;
 }
 
+// Yeap
 class customStack {
 private:
     signed char data[8]; //creats 8 slots, one per byte
@@ -57,7 +59,7 @@ signed char pop() {
 
 //Custom Queue
 //storing program instructions before execution
-
+// Yeap
 template <typename T>
 class customQueue
 {
@@ -105,6 +107,7 @@ class customQueue
     int getSize() { return size; }
 };
 
+// Muiz
 class Registers {
 
     private:
@@ -126,6 +129,7 @@ class Registers {
     } 
 };
 
+// Muiz
 class Memory {
     private:
     int8_t M[64];
@@ -147,6 +151,7 @@ class Memory {
 
 };
 
+// Muiz
 class Flags {
     private:
     bool UF = false, OF = false, ZF = false, CF = false;
@@ -193,6 +198,7 @@ class Flags {
 }
 };
 
+// Muiz
 class ProgramCounter {
     private:
     uint8_t PC;
@@ -212,7 +218,7 @@ class ProgramCounter {
     }
 };
 
-
+// Muiz
 class StackIndex {
     private:
     uint8_t SI;
@@ -236,6 +242,7 @@ class StackIndex {
     }
 };
 
+// Muiz
 class CPU {
     private:
     Registers reg;
@@ -356,11 +363,26 @@ public:
     Input(int d) : IOIns(d) {}
     void execute(CPU& cpu) override {
         int num;
-        do {
+        string line;
+        while (true) {
             cout << "? ";
-            cin >> num;
-        } while (num < -128 || num > 127);
-        
+            getline(cin, line);
+            stringstream ss(line);
+            // Read an integer
+            if (!(ss >> num)) {
+                cout << "Error: Invalid input. Expected an integer." << endl;
+                exit(EXIT_FAILURE);
+            }
+            // If anything remains, it's invalid
+            char extra;
+            if (ss >> extra) {
+                cout << "Error: Invalid input. Expected an integer." << endl;
+                exit(EXIT_FAILURE);
+            }
+            if (num >= -128 && num <= 127)
+                break;
+            cout << "Out of range (-128 to 127). Try again." << endl;
+        }
         cpu.setReg(getDest(), num);
     }
 };
@@ -604,6 +626,7 @@ public:
     }
 };
 
+// Andy
 class Helper
 {
 private:
@@ -616,7 +639,7 @@ public:
     int resolveValueReg(string operand, CPU& cpu);
     int resolveAddressReg(string operand, CPU& cpu);
 };
-
+// Andy
 int Helper::getRegisterNumber(string operand)
 {
     for (int i = 0; i < operand.length(); i++)
@@ -627,20 +650,36 @@ int Helper::getRegisterNumber(string operand)
 
     return -1;
 }
-
+// Andy
 int Helper::stringToInt(string str)
 {
     int num = 0;
-
-    for (int i = 0; i < str.length(); i++)
+    int sign = 1;
+    int i = 0;
+    // Skip leading spaces
+    while (i < str.length() && str[i] == ' ')
+        i++;
+    // Handle optional sign
+    if (i < str.length())
     {
-        if (str[i] >= '0' && str[i] <= '9')
-            num = num * 10 + (str[i] - '0');
+        if (str[i] == '-')
+        {
+            sign = -1;
+            i++;
+        }
+        else if (str[i] == '+')
+        {
+            i++;
+        }
     }
-
-    return num;
+    while (i < str.length() && str[i] >= '0' && str[i] <= '9')
+    {
+        num = num * 10 + (str[i] - '0');
+        i++;
+    }
+    return sign * num;
 }
-
+// Andy
 bool Helper::isRegister(string operand)
 {
     if (operand.length() == 2 && operand[0] == 'R')
@@ -651,7 +690,7 @@ bool Helper::isRegister(string operand)
 
     return false;
 }
-
+// Andy
 bool Helper::isImmediate(string operand)
 {
     bool hasDigit = false;
@@ -666,7 +705,7 @@ bool Helper::isImmediate(string operand)
 
     return hasDigit;
 }
-
+// Andy
 int Helper::resolveValueReg(string operand, CPU& cpu)
 {
     if (operand.find('[') != -1)
@@ -679,18 +718,19 @@ int Helper::resolveValueReg(string operand, CPU& cpu)
     if (operand.find('R') != -1)
     {
         int reg = getRegisterNumber(operand);
-        return cpu.getReg(reg);
+        return reg;
     }
 
     return stringToInt(operand);
 }
-
-int Helper::resolveAddressReg(string operand, CPU& cpu)
-{
+// Andy
+int Helper::resolveAddressReg(string operand, CPU& cpu) //help resolve the adress operands for LOAD and STORE instructions
+{   //, if the operand is a register then it will return value of register as the address, if immediate value then it will return the immediate value as the address
     if (operand.find('R') != -1)
     {
         int reg = getRegisterNumber(operand);
-        return cpu.getReg(reg);
+        int val = cpu.getReg(reg);
+        return val;
     }
 
     return stringToInt(operand);
@@ -699,7 +739,8 @@ int Helper::resolveAddressReg(string operand, CPU& cpu)
 // Andy
 
 // this is for parser
-class Parser
+// translates each assembly instruction into a instruction object which will be executed by the CPU
+class Parser 
 {
 private:
     Helper helper;
@@ -707,12 +748,13 @@ private:
     string getCommand(string line);//extracts the instuction
     string getFirstOperand(string line);
     string getSecondOperand(string line);
-    int getRegisterNumber(string reg);//converts register string to register number contoh cm R3--> 3
+    int getRegisterNumber(string reg);
     int stringToInt(string str);
 
 public:
     Instruction* parse(string line, CPU& cpu);
 };
+// Andy
 string Parser::getCommand(string line)
 {
     int spacePos = line.find(' ');
@@ -722,8 +764,8 @@ string Parser::getCommand(string line)
 
     return line.substr(0, spacePos);
 }
-
-string Parser::getFirstOperand(string line)
+// Andy
+string Parser::getFirstOperand(string line) //Extracts the first operand after the instruction.
 {
     int spacePos = line.find(' ');
     int commaPos = line.find(',');
@@ -736,8 +778,8 @@ string Parser::getFirstOperand(string line)
 
     return line.substr(spacePos + 1, commaPos - spacePos - 1);
 }
-
-string Parser::getSecondOperand(string line)
+// Andy
+string Parser::getSecondOperand(string line) //extracts second operand
 {
     int commaPos = line.find(',');
 
@@ -746,8 +788,8 @@ string Parser::getSecondOperand(string line)
 
     return line.substr(commaPos + 1);
 }
-
-int Parser::getRegisterNumber(string reg)
+// Andy
+int Parser::getRegisterNumber(string reg) //converts register string to register number contoh cm R3--> 3
 {
     for (int i = 0; i < reg.length(); i++)
     {
@@ -757,79 +799,74 @@ int Parser::getRegisterNumber(string reg)
 
     return -1;
 }
-
-int Parser::stringToInt(string str)
-{
+// Andy
+int Parser::stringToInt(string str) //convert string to int
+{ 
     int num = 0;
     int i = 0;
-
+    int sign = 1;
+    // Skip leading spaces
     while (i < str.length() && str[i] == ' ')
         i++;
-
-    for (; i < str.length(); i++)
+    // Check for optional sign
+    if (i < str.length())
     {
-        if (str[i] >= '0' && str[i] <= '9')
-            num = num * 10 + (str[i] - '0');
+        if (str[i] == '-')
+        {
+            sign = -1;
+            i++;
+        }
+        else if (str[i] == '+')
+        {
+            i++;
+        }
     }
-
-    return num;
+    // Read digits
+    while (i < str.length() && str[i] >= '0' && str[i] <= '9')
+    {
+        num = num * 10 + (str[i] - '0');
+        i++;
+    }
+    return sign * num;
 }
-
-Instruction* Parser::parse(string line, CPU& cpu)
-{
-    string cmd = getCommand(line);
-    string op1 = getFirstOperand(line);
-    string op2 = getSecondOperand(line);
-
+// Andy
+Instruction* Parser::parse(string line, CPU& cpu) // main parser, determine instruction type and creat the appropriate instruction obj
+// ===== Flag instructions ======
+{ 
+    string cmd = getCommand(line); string op1 = getFirstOperand(line); string op2 = getSecondOperand(line);
+    if (cmd == "RESET")
+        return new ResetFlag(op1);
     int dest = getRegisterNumber(op1);
     int src = getRegisterNumber(op2);
+   // ====== Memory instructions ======
+    if (cmd == "MOV") { int value = helper.resolveValueReg(op2, cpu); return new Move(dest, value); }
 
-    if (cmd == "MOV")
-{
-    int value = helper.resolveValueReg(op2, cpu);
-    return new Move(dest, value);
-}
+    if (cmd == "LOAD")
+    { int address = helper.resolveAddressReg(op2, cpu); int value = cpu.getMem(address); return new Load(dest, value); }
 
-if (cmd == "LOAD")
-{
-    int address = helper.resolveAddressReg(op2, cpu);
-    int value = cpu.getMem(address);
-    return new Load(dest, value);
-}
+    if (cmd == "STORE")
+    { int value = helper.resolveValueReg(op1, cpu); int address = helper.resolveAddressReg(op2, cpu); return new Store(value, address); }
 
-
-    if (cmd == "ADD")
-        return new Add(dest, src);
-
-    if (cmd == "SUB")
-        return new Sub(dest, src);
-
-    if (cmd == "MUL")
-        return new Mul(dest, src);
-
-    if (cmd == "DIV")
-        return new Div(dest, src);
-
-    if (cmd == "INC")
-        return new Inc(dest);
-
-    if (cmd == "DEC")
-        return new Dsc(dest);
-
-    if (cmd == "DISPLAY")
-        return new Display(dest);
-
-    if (cmd == "INPUT")
-        return new Input(dest);
-
+    if (cmd == "SHL") return new ShLIns(dest, src); // Start of Shift & Rotate Instructions
+    if (cmd == "SHR") return new ShRIns(dest, src); 
+    if (cmd == "ROL") return new RoLIns(dest, src); 
+    if (cmd == "ROR") return new RoRIns(dest, src); //End Shift & Rotate
+    if (cmd == "PUSH") return new Push(dest);       // Start of Stack Instructions
+    if (cmd == "POP") return new Pop(dest);         // End of Stack Instructions
+    if (cmd == "ADD") return new Add(dest, src);    // Start of Arithmetic Instructions
+    if (cmd == "SUB") return new Sub(dest, src);
+    if (cmd == "MUL") return new Mul(dest, src);
+    if (cmd == "DIV") return new Div(dest, src);    // End of Arithmetic Instructions
+    if (cmd == "INC") return new Inc(dest);
+    if (cmd == "DEC") return new Dsc(dest);
+    if (cmd == "DISPLAY") return new Display(dest); // Start of Input/Output Instructions
+    if (cmd == "INPUT") return new Input(dest);     // End of Input/Output Instructions
+    
     return nullptr;
 }
 
-
-
-
-
-class Runner
+// Andy
+class Runner //this class is to control the entire execution process 
 {
 private:
     string inputFile;
@@ -851,28 +888,29 @@ public:
     void printOutput();
     void saveOutput();
     void decodeAndExecute(string line);
+    void printFourDigits(ofstream& out, int value);
 };
-
-Runner::Runner(string input, string output)
+// Andy
+Runner::Runner(string input, string output) //Initializes the Runner with the input and output filenames
 {
     inputFile = input;
     outputFile = output;
 }
-
-void Runner::run()
+// Andy
+void Runner::run() // execute the completed program workflow ; (read file, execute program, print output and save output)
 {
     readFile();
     executeProgram();
     printOutput();
     saveOutput();
 }
-
-bool Runner::isEmptyLine(string line)
+// Andy
+bool Runner::isEmptyLine(string line) // check if a line from the input is empty or nah
 {
     return line.length() == 0;
 }
-
-void Runner::readFile()
+// Andy
+void Runner::readFile() // read the input file line by line and enqueue non-empty lines into the instruction queue
 {
     ifstream infile;
     string line;
@@ -895,8 +933,8 @@ void Runner::readFile()
 
     infile.close();
 }
-
-void Runner::executeProgram()
+// Andy
+void Runner::executeProgram() // executes every instruction in the queue (fifo order)
 {
     while (!instructionQueue.isEmpty())
     {
@@ -907,8 +945,8 @@ void Runner::executeProgram()
         cpu.incrementPC();    // 
     }
 }
-
-void Runner::decodeAndExecute(string line)
+// Andy
+void Runner::decodeAndExecute(string line) // decodes the instruction line into an Instruction object and executes it on the CPU
 {
     Instruction* instr = parser.parse(line, cpu);
 
@@ -921,16 +959,16 @@ void Runner::decodeAndExecute(string line)
     instr->execute(cpu);
     delete instr;
 }
-
-void Runner::printOutput()
+// Andy
+void Runner::printOutput() // displays execution summary and number of instructions executed
 {
     cout << endl;
     cout << "Program finished." << endl;
     cout << "Instructions executed: ";
     cout << (int)cpu.getPC() << endl;
 }
-
-void Runner::saveOutput()
+// Andy
+void Runner::saveOutput() // saves the final state of the CPU (registers, flags, PC, memory) to the output file
 {
     ofstream out;
 
@@ -946,27 +984,52 @@ void Runner::saveOutput()
 
     out.close();
 }
+// Andy
+void Runner::printFourDigits(ofstream& out, int value) // prints an integer value as a 4-digit string with leading zeros, handling negative values
+{   
 
-void Runner::writeFinalOutput(ofstream& out)
+    if (value < 0)
+    {
+        out << "-";
+        value = -value;
+    }
+
+    if (value < 10)
+        out << "000";
+    else if (value < 100)
+        out << "00";
+    else if (value < 1000)
+        out << "0";
+
+    out << value;
+}
+// Andy
+void Runner::writeFinalOutput(ofstream& out) // writes the final state of the CPU to the output file in a structured format
 {
     out << "#Begin#" << endl;
 
     out << "#Registers#";
     for (int i = 0; i < 8; i++)
-        out << (int)cpu.getReg(i) << "#";
-    out << endl;
+    {
+        printFourDigits(out, (int)cpu.getReg(i));
+        out << "#";
+    }
 
+    out << endl;
     out << "#Flags#OF#" << cpu.getOF();
     out << "#UF#" << cpu.getUF();
     out << "#CF#" << cpu.getCF();
     out << "#ZF#" << cpu.getZF() << "#" << endl;
 
-    out << "#PC#" << (int)cpu.getPC() << "#" << endl;
+    out << "#PC#";
+    printFourDigits(out, (int)cpu.getPC());
+    out << "#" << endl;
 
     out << "#Memory#" << endl;
     for (int i = 0; i < 64; i++)
     {
-        out << "#" << (int)cpu.getMem(i);
+        out << "#";
+        printFourDigits(out, (int)cpu.getMem(i));
 
         if ((i + 1) % 8 == 0)
             out << "#" << endl;
@@ -980,11 +1043,12 @@ int main()
     string inputFile;
     string outputFile;
 
-    cout << "Enter input assembly file (.asm): ";
+    cout << "Enter input assembly file in format (.asm): ";
     cin >> inputFile;
 
-    cout << "Enter output result file: ";
+    cout << "Enter output result file in format (.asm): ";
     cin >> outputFile;
+    cin.ignore();
 
     Runner runner(inputFile, outputFile);
     runner.run();
