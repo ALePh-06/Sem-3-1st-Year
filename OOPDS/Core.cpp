@@ -49,7 +49,7 @@ signed char pop() {
     return data[SI--];
     }
 
-    bool isEmpty() { return SI == -1; }//empties the SI that was decremented
+bool isEmpty() { return SI == -1; }//empties the SI that was decremented
 };
 
 class Registers {
@@ -227,7 +227,7 @@ class CPU {
 class Instruction {
 public:
     virtual void execute(CPU& cpu) = 0;   // pure virtual
-    virtual ~Instruction() {}             // always virtual destructor
+    virtual ~Instruction() {}             // virtual destructor
 };
 
 //ALif
@@ -243,8 +243,8 @@ public:
 //ALif
 class DataTransIns : public Instruction {
 private:
-    int dest;
-    int src; //AKA source
+    int dest; // register destination
+    int src; // register source
 protected:
     int getDest() {return dest;}
     int getSrc() {return src;}
@@ -265,14 +265,13 @@ public:
 //ALif
 class ArithmeticIns : public Instruction {
 private:
-    int dest; // register index, e.g. 2 for R2
-    int src;  // register index
+    int dest;
+    int src;
 protected:
     int getDest() {return dest;}
     int getSrc() {return src;}
 public:
     ArithmeticIns(int d, int s) : dest(d), src(s) {}
-    // still abstract
 };
 
 //ALif
@@ -306,7 +305,7 @@ public:
         do {
             cout << "? ";
             cin >> num;
-        } while (num < -128 || num > 127);
+        } while (num < -128 || num > 127);// Repeat until input is in range
         
         cpu.setReg(getDest(), num);
     }
