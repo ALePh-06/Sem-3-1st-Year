@@ -111,12 +111,12 @@ class customQueue
 class Registers {
 
     private:
-    int8_t R[8];
+    int8_t R[8]; // making 8 spaces in an array
 
     public:
     Registers () 
     {
-        for ( int i = 0; i < 8; i++ )
+        for ( int i = 0; i < 8; i++ ) // initialise every registers to have value '0'
             R[i] = 0;
     }
 
@@ -125,20 +125,20 @@ class Registers {
     }
 
     void setRegister (int pos, int value) {
-        R[pos] = value;
+        R[pos] = value;             // setter to insert value to certain registers.
     } 
 };
 
 // Muiz
 class Memory {
     private:
-    int8_t M[64];
+    int8_t M[64];  // to make 64 spaces in an array, signed 1 byte
 
     public:
     Memory ()
     {
         for ( int i = 0; i < 64; i++)
-        M[i] = 0;
+        M[i] = 0;        // initialise everything to have value '0'
     }
 
     int8_t getMemory ( int pos ) {
@@ -146,7 +146,7 @@ class Memory {
     }
 
     void setMemory ( int pos, int value ) {
-        M[pos] = value;
+        M[pos] = value;     // to insert value/input into memory allocations
     }
 
 };
@@ -154,7 +154,7 @@ class Memory {
 // Muiz
 class Flags {
     private:
-    bool UF = false, OF = false, ZF = false, CF = false;
+    bool UF = false, OF = false, ZF = false, CF = false;  
 
     public:
 
@@ -253,9 +253,9 @@ class CPU {
     
     public:
 
-    CPU () {};
+    CPU () {};          // constructor to initialise for other classes to use.
     // Registers focus
-    void setReg( int pos, int value) { reg.setRegister(pos, value); };
+    void setReg( int pos, int value) { reg.setRegister(pos, value); };      
     int8_t getReg(int pos) { return reg.getRegister(pos); };
 
     // Memory focus
@@ -282,6 +282,9 @@ class CPU {
     int8_t popStack()            { return CS.pop(); }
     int getSI()                  { return CS.getSI(); }
 };
+
+// End Muiz part //
+// ================================================================================================= //
 
 //ALif
 class Instruction {

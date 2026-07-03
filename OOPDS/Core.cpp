@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstdint>
+#include <sstream>
 using namespace std;
 
 // Alif - Converts a signed byte to an 8-element int array (MSB at index 0)
@@ -49,7 +50,7 @@ signed char pop() {
     return data[SI--];
     }
 
-    bool isEmpty() { return SI == -1; }//empties the SI that was decremented
+bool isEmpty() { return SI == -1; }//empties the SI that was decremented
 };
 
 class Registers {
@@ -227,7 +228,7 @@ class CPU {
 class Instruction {
 public:
     virtual void execute(CPU& cpu) = 0;   // pure virtual
-    virtual ~Instruction() {}             // always virtual destructor
+    virtual ~Instruction() {}             // virtual destructor
 };
 
 //ALif
@@ -243,8 +244,8 @@ public:
 //ALif
 class DataTransIns : public Instruction {
 private:
-    int dest;
-    int src; //AKA source
+    int dest; // register destination
+    int src; // register source
 protected:
     int getDest() {return dest;}
     int getSrc() {return src;}
@@ -265,14 +266,13 @@ public:
 //ALif
 class ArithmeticIns : public Instruction {
 private:
-    int dest; // register index, e.g. 2 for R2
-    int src;  // register index
+    int dest;
+    int src;
 protected:
     int getDest() {return dest;}
     int getSrc() {return src;}
 public:
     ArithmeticIns(int d, int s) : dest(d), src(s) {}
-    // still abstract
 };
 
 //ALif
@@ -301,13 +301,36 @@ public:
 class Input : public IOIns {
 public:
     Input(int d) : IOIns(d) {}
+
     void execute(CPU& cpu) override {
         int num;
-        do {
+        string line;
+
+        while (true) {
             cout << "? ";
-            cin >> num;
-        } while (num < -128 || num > 127);
-        
+            getline(cin, line);
+
+            stringstream ss(line);
+
+            // Read an integer
+            if (!(ss >> num)) {
+                cout << "Error: Invalid input. Expected an integer." << endl;
+                exit(EXIT_FAILURE);
+            }
+
+            // If anything remains, it's invalid
+            char extra;
+            if (ss >> extra) {
+                cout << "Error: Invalid input. Expected an integer." << endl;
+                exit(EXIT_FAILURE);
+            }
+
+            if (num >= -128 && num <= 127)
+                break;
+
+            cout << "Out of range (-128 to 127). Try again." << endl;
+        }
+
         cpu.setReg(getDest(), num);
     }
 };
@@ -553,6 +576,6 @@ public:
 
 int main() {
     CPU cpu;
-
+    
     return 0;
 }
