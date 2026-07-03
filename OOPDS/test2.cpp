@@ -679,18 +679,19 @@ int Helper::resolveValueReg(string operand, CPU& cpu)
     if (operand.find('R') != -1)
     {
         int reg = getRegisterNumber(operand);
-        return cpu.getReg(reg);
+        return reg;
     }
 
     return stringToInt(operand);
 }
 
 int Helper::resolveAddressReg(string operand, CPU& cpu)
-{
+{   
     if (operand.find('R') != -1)
     {
         int reg = getRegisterNumber(operand);
-        return cpu.getReg(reg);
+        int val = cpu.getReg(reg);
+        return val;
     }
 
     return stringToInt(operand);
@@ -781,22 +782,50 @@ Instruction* Parser::parse(string line, CPU& cpu)
     string op1 = getFirstOperand(line);
     string op2 = getSecondOperand(line);
 
+    if (cmd == "RESET")
+        return new ResetFlag(op1);
+
     int dest = getRegisterNumber(op1);
     int src = getRegisterNumber(op2);
 
     if (cmd == "MOV")
-{
-    int value = helper.resolveValueReg(op2, cpu);
-    return new Move(dest, value);
-}
+    {
+        int value = helper.resolveValueReg(op2, cpu);
+        return new Move(dest, value);
+    }
 
-if (cmd == "LOAD")
-{
-    int address = helper.resolveAddressReg(op2, cpu);
-    int value = cpu.getMem(address);
-    return new Load(dest, value);
-}
+    if (cmd == "LOAD")
+    {
+        int address = helper.resolveAddressReg(op2, cpu);
+        int value = cpu.getMem(address);
+        return new Load(dest, value);
+    }
 
+    if (cmd == "STORE")
+    {
+        int value = helper.resolveValueReg(op1, cpu);
+        int address = helper.resolveAddressReg(op2, cpu);
+
+        return new Store(value, address);
+    }
+
+    if (cmd == "SHL")
+        return new ShLIns(dest, src);
+
+    if (cmd == "SHR")
+        return new ShRIns(dest, src);
+
+    if (cmd == "ROL")
+        return new RoLIns(dest, src);
+
+    if (cmd == "ROR")
+        return new RoRIns(dest, src);
+
+    if (cmd == "PUSH")
+        return new Push(dest);
+
+    if (cmd == "POP")
+        return new Pop(dest);
 
     if (cmd == "ADD")
         return new Add(dest, src);
@@ -980,10 +1009,10 @@ int main()
     string inputFile;
     string outputFile;
 
-    cout << "Enter input assembly file (.asm): ";
+    cout << "Enter input assembly file in format (.asm): ";
     cin >> inputFile;
 
-    cout << "Enter output result file: ";
+    cout << "Enter output result file in format (.asm): ";
     cin >> outputFile;
 
     Runner runner(inputFile, outputFile);
